@@ -1,8 +1,8 @@
 {
-  "name": "com.github.asus4.onnxruntime.unity",
-  "displayName": "ONNX Runtime Unity Utilities",
+  "name": "com.github.asus4.onnxruntime.win-x64-gpu",
+  "displayName": "ONNX Runtime - Windows x64 GPU",
   "author": "Koki Ibukuro",
-  "description": "ONNX Runtime Utilities for Unity",
+  "description": "ONNX Runtime for Unity - Windows x64 GPU Provider",
   "keywords": [
     "unity"
   ],

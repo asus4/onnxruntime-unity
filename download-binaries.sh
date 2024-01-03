@@ -9,8 +9,8 @@ if [[ ! $1 =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 # Define Variables
-PROJCET_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PLUGINS_DIR="$PROJCET_DIR/Packages/com.github.asus4.onnxruntime/Plugins"
+PROJCET_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+PLUGINS_DIR="$PROJCET_DIR/com.github.asus4.onnxruntime/Plugins"
 
 VTAG=$1
 TAG=$(echo $VTAG | sed 's/v//g') # Remove the leading v
@@ -55,16 +55,16 @@ function extract_releases_tgz() {
 }
 
 # Windows x64
-# download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
-# extract_releases_zip onnxruntime-win-x64-gpu-$TAG "lib/*.dll" $PLUGINS_DIR/Windows/x64
+download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
+extract_releases_zip onnxruntime-win-x64-gpu-$TAG "lib/*.dll" $PLUGINS_DIR/Windows/x64
 
 # macOS Universal
 download_github_releases onnxruntime-osx-universal2-$TAG.tgz
 extract_releases_tgz onnxruntime-osx-universal2-$TAG "lib/libonnxruntime.$TAG.dylib" $PLUGINS_DIR/macOS/libonnxruntime.dylib
 
 # Linux x64
-# download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
-# extract_releases_tgz onnxruntime-linux-x64-gpu-$TAG "lib/*.so" $PLUGINS_DIR/Linux/x64/
+download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
+extract_releases_tgz onnxruntime-linux-x64-gpu-$TAG "lib/*.so" $PLUGINS_DIR/Linux/x64/
 
 echo "Done."
 exit 0

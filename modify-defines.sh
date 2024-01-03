@@ -1,7 +1,8 @@
 #!/bin/bash -xe
 
-DEFINES_FILE="$(cd "$(dirname "$0")" && pwd -P)/UnityDefines.cs"
-SRC_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)/Packages/com.github.asus4.onnxruntime/Runtime"
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+DEFINES_FILE="$PROJECT_DIR/UnityDefines.cs"
+SRC_ROOT="$PROJECT_DIR/com.github.asus4.onnxruntime/Runtime"
 
 concat_defines() {
     cat "${DEFINES_FILE}" "$1" > "$1.tmp"

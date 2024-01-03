@@ -6,6 +6,8 @@ Pre-built ONNX Runtime libraries for Unity.
 
 ## [See Examples](https://github.com/asus4/onnxruntime-unity-examples)
 
+[https://github.com/asus4/onnxruntime-unity-examples](https://github.com/asus4/onnxruntime-unity-examples)
+
 <https://github.com/asus4/onnxruntime-unity-examples/assets/357497/96ed9913-41b7-401d-a634-f0e2de4fc3c7>
 
 ## Tested environment
@@ -16,7 +18,7 @@ Pre-built ONNX Runtime libraries for Unity.
 
 ## How to Install
 
-Add the following `scopedRegistries` and `dependencies` in `Packages/manifest.json`.
+Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.github.asus4.onnxruntime). Add the following `scopedRegistries` and `dependencies` in `Packages/manifest.json`.
 
 ```json
   "scopedRegistries": [

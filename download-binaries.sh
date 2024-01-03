@@ -51,5 +51,7 @@ download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
 cp -RL onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
 cp onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
+# TODO: Android and iOS
+
 echo "Done."
 exit 0

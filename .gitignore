@@ -1,0 +1,7 @@
+# Ignore native libraries
+*.aar
+*.dylib
+*.dll
+*.framework
+*.so
+*.xcframework

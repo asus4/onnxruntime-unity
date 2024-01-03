@@ -37,17 +37,19 @@ function download_github_releases() {
     fi
 }
 
-# Windows x64
-download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
-cp "onnxruntime-win-x64-gpu-$TAG/lib/*.dll" $PLUGINS_CORE_DIR/Windows/x64
-
 # macOS Universal
 download_github_releases onnxruntime-osx-universal2-$TAG.tgz
-cp "onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.$TAG.dylib" $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
+cp -RL onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
+
+# Windows x64
+download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
+cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
+cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Linux x64
 download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
-cp -RL "onnxruntime-linux-x64-gpu-$TAG/lib/*.so" $PLUGINS_CORE_DIR/Linux/x64/
+cp -RL onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
+cp onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
 echo "Done."
 exit 0

@@ -1,0 +1,16 @@
+{
+  "name": "com.github.asus4.onnxruntime.unity",
+  "displayName": "ONNX Runtime Unity Utilities",
+  "author": "Koki Ibukuro",
+  "description": "ONNX Runtime Utilities for Unity",
+  "keywords": [
+    "unity"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "unity": "2022.3",
+  "unityRelease": "0f1",
+  "version": "0.1.2",
+  "dependencies": {
+    "com.github.asus4.onnxruntime": "0.1.2"
+  }
+}

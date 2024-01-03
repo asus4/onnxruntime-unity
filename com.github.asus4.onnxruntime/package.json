@@ -1,0 +1,13 @@
+{
+  "name": "com.github.asus4.onnxruntime",
+  "displayName": "ONNX Runtime",
+  "author": "Koki Ibukuro",
+  "description": "ONNX Runtime Plugin for Unity",
+  "keywords": [
+    "unity"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "unity": "2022.3",
+  "unityRelease": "0f1",
+  "version": "0.1.2"
+}

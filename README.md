@@ -46,13 +46,13 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
   ]
   "dependencies": {
     // Core library
-    "com.github.asus4.onnxruntime": "0.1.3",
+    "com.github.asus4.onnxruntime": "0.1.4",
     // (Optional) Utilities for Unity
-    "com.github.asus4.onnxruntime.unity": "0.1.3",
+    "com.github.asus4.onnxruntime.unity": "0.1.4",
     // (Optional) GPU provider extensions for Windows/Linux (each 300mb+)
     // CPU for Windows/Linux is included in core library
-    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.3",
-    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.3",
+    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.4",
+    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.4",
     ... other dependencies
   }
 ```

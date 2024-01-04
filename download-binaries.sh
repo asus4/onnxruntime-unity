@@ -42,6 +42,7 @@ download_github_releases onnxruntime-osx-universal2-$TAG.tgz
 cp -RL onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
 
 # Windows x64
+# TODO: use DirectML version by default
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
 cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
 cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/

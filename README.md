@@ -14,7 +14,21 @@ Pre-built ONNX Runtime libraries for Unity.
 
 - Unity: 2022.3.16f1 (LTS)
 - ONNX Runtime: 1.16.3
-- macOS, iOS, Android
+
+### Execution Providers
+
+ONNX Runtime supports running on hardware acceleration libraries. See [official docs](https://onnxruntime.ai/docs/execution-providers/).
+
+| Platform | CPU | CoreML | NNAPI | CUDA | TensorRT | DirectML |
+| --- | --- | --- | --- | --- | --- | --- |
+| macOS | :white_check_mark: | :white_check_mark: | | | | |
+| iOS | :white_check_mark: | :white_check_mark: | | | | |
+| Android | :white_check_mark: | | :white_check_mark: | | | |
+| Windows | :white_check_mark: | | | :construction: | :construction: | :white_check_mark: |
+| Linux | :white_check_mark: | | | :construction: | :construction: | |
+
+:white_check_mark: : Supported in Unity Core library  
+:construction: : Beta Preview
 
 ## How to Install
 

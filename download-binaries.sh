@@ -11,6 +11,8 @@ fi
 # Define Variables
 PROJCET_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PLUGINS_CORE_DIR="$PROJCET_DIR/com.github.asus4.onnxruntime/Plugins"
+mkdir -p .tmp
+TMP_DIR="$PROJCET_DIR/.tmp"
 
 VTAG=$1
 TAG=$(echo $VTAG | sed 's/v//g') # Remove the leading v
@@ -19,33 +21,34 @@ TAG=$(echo $VTAG | sed 's/v//g') # Remove the leading v
 function download_github_releases() {
     FILE_NAME=$1
     # Skip if the file already exists
-    if [ -f $FILE_NAME ]; then
+    if [ -f $TMP_DIR/$FILE_NAME ]; then
         echo "$FILE_NAME already exists. Skipping download."
         return
     fi
     # FILES
     BASE_URL=https://github.com/microsoft/onnxruntime/releases/download/$VTAG
     echo "Downloading from $BASE_URL/$FILE_NAME"
-    curl -L $BASE_URL/$FILE_NAME -o $FILE_NAME
+    curl -L $BASE_URL/$FILE_NAME -o $TMP_DIR/$FILE_NAME
 
     # If .zip
     if [[ $FILE_NAME =~ \.zip$ ]]; then
-        unzip -o $FILE_NAME
+        # unzip into tmp folder if 
+        unzip -o $TMP_DIR/$FILE_NAME -d $TMP_DIR
     # if .tgz
     elif [[ $FILE_NAME =~ \.tgz$ ]]; then
-        tar -xzf $FILE_NAME
+        tar -xzf $TMP_DIR/$FILE_NAME -C $TMP_DIR
     fi
 }
 
 # macOS Universal
 download_github_releases onnxruntime-osx-universal2-$TAG.tgz
-cp -RL onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
+cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
 
 # Windows x64
-# TODO: use DirectML version by default
+download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.zip
+cp $TMP_DIR/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
-cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
-cp onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
+cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Linux x64
 download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz

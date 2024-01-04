@@ -51,7 +51,10 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             // Then add to Xcode project
             string frameworkGuid = pbxProject.AddFile(frameworkDstAbsPath, frameworkDstRelPath, PBXSourceTree.Source);
             string targetGuid = pbxProject.GetUnityFrameworkTargetGuid();
-            pbxProject.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
+            // Note: onnxruntime.xcframework should be linked in build section. Embed framework didn't work.
+            // pbxProject.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
+            string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(targetGuid);
+            pbxProject.AddFileToBuildSection(targetGuid, targetBuildPhaseGuid, frameworkGuid);
 
             pbxProject.WriteToFile(pbxProjectPath);
 #endif // UNITY_IOS

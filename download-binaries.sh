@@ -55,8 +55,8 @@ cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCE
 
 # Linux x64
 download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
-cp -RL onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
-cp onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
+cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
+cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
 # iOS
 download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net

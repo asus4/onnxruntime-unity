@@ -18,18 +18,17 @@ VTAG=$1
 TAG=$(echo $VTAG | sed 's/v//g') # Remove the leading v
 
 # Functions
-function download_github_releases() {
+function download_package() {
     FILE_NAME=$1
+    BASE_URL=$2
     # Skip if the file already exists
     if [ -f $TMP_DIR/$FILE_NAME ]; then
         echo "$FILE_NAME already exists. Skipping download."
         return
     fi
     # FILES
-    BASE_URL=https://github.com/microsoft/onnxruntime/releases/download/$VTAG
     echo "Downloading from $BASE_URL/$FILE_NAME"
     curl -L $BASE_URL/$FILE_NAME -o $TMP_DIR/$FILE_NAME
-
     # If .zip
     if [[ $FILE_NAME =~ \.zip$ ]]; then
         # unzip into tmp folder if 
@@ -38,6 +37,10 @@ function download_github_releases() {
     elif [[ $FILE_NAME =~ \.tgz$ ]]; then
         tar -xzf $TMP_DIR/$FILE_NAME -C $TMP_DIR
     fi
+}
+
+function download_github_releases() {
+    download_package $1 https://github.com/microsoft/onnxruntime/releases/download/$VTAG
 }
 
 # macOS Universal
@@ -55,7 +58,12 @@ download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
 cp -RL onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
 cp onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
-# TODO: Android and iOS
+# iOS
+download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
+cp -R $TMP_DIR/onnxruntime.xcframework $PLUGINS_CORE_DIR/iOS~/
+
+# Android
+curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/$TAG/onnxruntime-android-$TAG.aar -o $PLUGINS_CORE_DIR/Android/onnxruntime-android.aar
 
 echo "Done."
 exit 0

@@ -46,15 +46,22 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
   ]
   "dependencies": {
     // Core library
-    "com.github.asus4.onnxruntime": "0.1.4",
+    "com.github.asus4.onnxruntime": "0.1.5",
     // (Optional) Utilities for Unity
-    "com.github.asus4.onnxruntime.unity": "0.1.4",
+    "com.github.asus4.onnxruntime.unity": "0.1.5",
     // (Optional) GPU provider extensions for Windows/Linux (each 300mb+)
     // CPU for Windows/Linux is included in core library
-    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.4",
-    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.4",
+    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.5",
+    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.5",
     ... other dependencies
   }
+```
+
+If you want to get binaries yourself, Run download-binaries.sh command.  
+
+```sh
+# ./download-binaries.sh vX.Y.Z (GitHub release tag)
+./download-binaries.sh v1.16.3
 ```
 
 ## Links for libraries

@@ -1,5 +1,5 @@
-
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
@@ -20,6 +20,22 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         Fill = 2,
     }
 
+    public enum ExecutionProviderPriority
+    {
+        /// <summary>
+        /// Default CPU
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Choose GPU EP for each platform
+        /// </summary>
+        PlatformGPU = 1,
+        /// <summary>
+        /// XNNPACK EP
+        /// </summary>
+        XNNPACK = 2,
+    }
+
     /// <summary>
     /// An option to create a Image inference
     /// </summary>
@@ -33,34 +49,65 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         public Vector3 std = new(0.229f, 0.224f, 0.225f);
 
         [Header("Inference options")]
-        [Tooltip("Whether to use GPU")]
-        public bool useGPU = false;
+        [Tooltip("Priorities of Execution Provider")]
+        public ExecutionProviderPriority[] executionProviderPriorities =
+        {
+            ExecutionProviderPriority.PlatformGPU,
+            ExecutionProviderPriority.XNNPACK
+        };
 
-
+        /// <summary>
+        /// Create a session options with Execution Provider
+        /// </summary>
+        /// <returns>Created session options, which must be disposed</returns>
         public SessionOptions CreateSessionOptions()
         {
             SessionOptions options = new();
-            if (useGPU)
+
+            foreach (var provider in executionProviderPriorities)
             {
                 try
                 {
-                    AppendExecutionProvider(Application.platform, options);
+                    AddExecutionProvider(options, provider);
+                    break;
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to setup GPU: {e.Message}");
+                    Debug.LogError($"Failed to initialize GPU Execution Provider: {e.Message}");
                 }
             }
 
             return options;
         }
 
+
         /// <summary>
-        /// Automatically append execution provider based on the platform
+        /// Append XNNPACK provider. Available on Android/iOS for now.
         /// </summary>
-        /// <param name="platform"></param>
         /// <param name="options"></param>
-        public void AppendExecutionProvider(RuntimePlatform platform, SessionOptions options)
+        public void AppendXNNPackProvider(SessionOptions options)
+        {
+            // See recommended configuration for XNNPACK
+            // https://onnxruntime.ai/docs/execution-providers/Xnnpack-ExecutionProvider.html#recommended-configuration
+
+            options.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
+
+            // Threads for XNNPACK
+            int threads = Math.Clamp(SystemInfo.processorCount, 1, 4);
+            options.AppendExecutionProvider("XNNPACK", new Dictionary<string, string>()
+            {
+                { "intra_op_num_threads", threads.ToString()},
+            });
+
+            options.IntraOpNumThreads = 1;
+        }
+
+        /// <summary>
+        /// Automatically find recommended GPU execution provider for the platform
+        /// </summary>
+        /// <param name="platform">A runtime platform</param>
+        /// <param name="options">A session options</param>
+        public void AppendPlatformExecutionProvider(RuntimePlatform platform, SessionOptions options)
         {
             // Debug.Log($"Graphics device type: {SystemInfo.graphicsDeviceType}");
 
@@ -109,6 +156,22 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 // TODO: Add WebGL build
                 default:
                     Debug.LogWarning($"Execution provider is not supported on {platform}");
+                    break;
+            }
+        }
+
+        private void AddExecutionProvider(SessionOptions options, ExecutionProviderPriority priority)
+        {
+
+            switch (priority)
+            {
+                case ExecutionProviderPriority.None:
+                    break;
+                case ExecutionProviderPriority.PlatformGPU:
+                    AppendPlatformExecutionProvider(Application.platform, options);
+                    break;
+                case ExecutionProviderPriority.XNNPACK:
+                    AppendXNNPackProvider(options);
                     break;
             }
         }

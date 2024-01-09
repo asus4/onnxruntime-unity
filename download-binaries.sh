@@ -1,4 +1,6 @@
-#!/bin/bash -xe
+#!/bin/bash
+
+set -e -x -u
 
 # Download binaries for each platform
 

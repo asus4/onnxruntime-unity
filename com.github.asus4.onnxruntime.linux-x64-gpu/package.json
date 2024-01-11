@@ -1,16 +1,26 @@
 {
   "name": "com.github.asus4.onnxruntime.linux-x64-gpu",
+  "version": "0.1.6",
   "displayName": "ONNX Runtime - Linux x64 GPU",
-  "author": "Koki Ibukuro",
   "description": "ONNX Runtime for Unity - Linux x64 GPU Provider",
   "keywords": [
-    "unity"
+    "unity",
+    "onnxruntime"
   ],
-  "license": "SEE LICENSE IN LICENSE",
   "unity": "2022.3",
   "unityRelease": "0f1",
-  "version": "0.1.5",
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.1.5"
+    "com.github.asus4.onnxruntime": "0.1.6"
+  },
+  "repository": {
+    "type": "git",
+    "repository": "https://github.com/asus4/onnxruntime-unity.git"
+  },
+  "documentationUrl": "https://github.com/asus4/onnxruntime-unity",
+  "changelogUrl": "https://github.com/asus4/onnxruntime-unity/releases",
+  "licensesUrl": "https://github.com/asus4/onnxruntime-unity/blob/main/onnxruntime.linux-x64-gpu/LICENSE",
+  "author": {
+    "name": "Koki Ibukuro",
+    "url": "https://github.com/asus4"
   }
 }

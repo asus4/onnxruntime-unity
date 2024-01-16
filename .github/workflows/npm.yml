@@ -23,7 +23,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: ./download-binaries.sh v1.16.3
       # Publish all packages in matrix
-      - run: npm publish
-        working-directory: ${{ matrix.publish-packages }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - run: npm publish
+      #   working-directory: ${{ matrix.publish-packages }}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

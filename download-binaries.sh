@@ -62,7 +62,7 @@ function download_github_releases() {
 
 # iOS
 download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
-mkdir -p $TMP_DIR/onnxruntime.xcframework
+mkdir -p $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
 cp -R $TMP_DIR/onnxruntime.xcframework/* $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
 ls $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
 

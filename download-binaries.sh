@@ -46,19 +46,19 @@ function download_github_releases() {
 }
 
 # macOS Universal
-# download_github_releases onnxruntime-osx-universal2-$TAG.tgz
-# cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
+download_github_releases onnxruntime-osx-universal2-$TAG.tgz
+cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
 
 # Windows x64
-# download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.zip
-# cp $TMP_DIR/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
-# download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
-# cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
+download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.zip
+cp $TMP_DIR/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
+download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
+cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Linux x64
-# download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
-# cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
-# cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
+download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
+cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
+cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
 # iOS
 download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
@@ -67,7 +67,7 @@ cp -R $TMP_DIR/onnxruntime.xcframework/* $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcfr
 ls $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
 
 # Android
-# curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/$TAG/onnxruntime-android-$TAG.aar -o $PLUGINS_CORE_DIR/Android/onnxruntime-android.aar
+curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/$TAG/onnxruntime-android-$TAG.aar -o $PLUGINS_CORE_DIR/Android/onnxruntime-android.aar
 
 echo "Done."
 exit 0

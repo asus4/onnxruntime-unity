@@ -4,15 +4,7 @@ on:
     types: [created]
   workflow_dispatch:
 jobs:
-  publish:
-    strategy:
-      matrix:
-        publish-packages: [
-          com.github.asus4.onnxruntime,
-          com.github.asus4.onnxruntime.unity,
-          com.github.asus4.onnxruntime.linux-x64-gpu,
-          com.github.asus4.onnxruntime.win-x64-gpu
-        ]
+  npm-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +15,19 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: ./download-binaries.sh v1.16.3
       # Publish all packages in matrix
-      # - run: npm publish
-      #   working-directory: ${{ matrix.publish-packages }}
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish
+        working-directory: com.github.asus4.onnxruntime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish
+        working-directory: com.github.asus4.onnxruntime.unity
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish
+        working-directory: com.github.asus4.onnxruntime.linux-x64-gpu
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish
+        working-directory: com.github.asus4.onnxruntime.win-x64-gpu
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

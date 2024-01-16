@@ -1,6 +1,6 @@
 {
   "name": "com.github.asus4.onnxruntime.unity",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "displayName": "ONNX Runtime Unity Utilities",
   "description": "ONNX Runtime Utilities for Unity",
   "keywords": [
@@ -10,7 +10,7 @@
   "unity": "2022.3",
   "unityRelease": "0f1",
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.1.6"
+    "com.github.asus4.onnxruntime": "0.1.7"
   },
   "repository": {
     "type": "git",

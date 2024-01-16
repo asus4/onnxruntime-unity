@@ -62,6 +62,7 @@ cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PR
 
 # iOS
 download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
+mkdir -p $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework
 cp -R $TMP_DIR/onnxruntime.xcframework $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework
 
 # Android

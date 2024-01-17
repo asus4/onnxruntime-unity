@@ -1,0 +1,60 @@
+# Build multi-platform ONNX Runtime Extensions
+#
+# Based on onnxruntime-minimal-builder: MIT License
+# https://github.com/stakemura/onnxruntime-minimal-builder/blob/main/LICENSE
+name: Build ONNX Runtime Extensions
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag or Branch name (e.g., v0.9.0 or main)"
+        required: false
+env:
+  VERSION: ${{ github.event.inputs.version || 'main' }}
+  ORT_VERSION: 1.16.3
+
+jobs:
+  # Build for each platform. See example build script at
+  # .pipelines/templates/build-package-for-{PLATFORM}.yml
+  build:
+    strategy:
+        matrix:
+          include:
+            - artifact-name: linux-x64
+              run-os: ubuntu-latest
+              build-script: ./build_lib.sh --build_dir out/ --config RelWithDebInfo --parallel --cmake_extra_defines OCOS_ONNXRUNTIME_VERSION="$ORT_VERSION"
+              artifact-path: out/RelWithDebInfo/lib/libortextensions.so
+            - artifact-name: win-x64
+              run-os: windows-latest
+              build-script: cmd /c .\build_lib.bat --x64 --build_dir out --config RelWithDebInfo --parallel --cmake_generator "Visual Studio 17 2022" --cmake_extra_defines OCOS_ONNXRUNTIME_VERSION="$ORT_VERSION"
+              artifact-path: out\RelWithDebInfo\bin\libortextensions.dylib
+            - artifact-name: macos-universal
+              run-os: macos-latest
+              build-script: ./build_lib.sh --build_dir out/ --config RelWithDebInfo --parallel --cmake_extra_defines CMAKE_OSX_ARCHITECTURES="arm64;x86_64" OCOS_ONNXRUNTIME_VERSION="$ORT_VERSION"
+              artifact-path: out/RelWithDebInfo/lib/libortextensions.dylib
+    runs-on: ${{ matrix.run-os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime-extensions
+          ref: ${{ env.VERSION }}
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+        run: echo "$MATRIX_CONTEXT" > matrix.json
+      - name: Cache build result
+        id: cache-build-result
+        uses: actions/cache@v3
+        with:
+          path: out/
+          key: ${{ matrix.artifact-name }}-${{ env.VERSION }}-${{ env.ORT_VERSION }}-${{ hashFiles('matrix.json') }}
+      - name: Build ONNX Runtime Extensions
+        if: steps.cache-build-result.outputs.cache-hit != 'true'
+        run: |
+          ${{ matrix.build-script }}
+      - name: Upload build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: onnxruntime-extensions-${{ matrix.artifact-name }}-${{ env.VERSION }}
+          path: ${{ matrix.artifact-path }}
+          retention-days: 7

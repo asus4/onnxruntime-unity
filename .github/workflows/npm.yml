@@ -8,13 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
       - uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
-      - run: ./download-binaries.sh v1.16.3
-      # Publish all packages in matrix
+      # Download binaries from GitHub release
+      - run: ./scripts/download-binaries.sh v1.16.3
+      # Publish all packages
       - run: npm publish
         working-directory: com.github.asus4.onnxruntime
         env:

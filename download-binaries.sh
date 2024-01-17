@@ -45,6 +45,10 @@ function download_github_releases() {
     download_package $1 https://github.com/microsoft/onnxruntime/releases/download/$VTAG
 }
 
+#--------------------------------------
+# ONNX Runtime
+#--------------------------------------
+
 # macOS Universal
 download_github_releases onnxruntime-osx-universal2-$TAG.tgz
 cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib

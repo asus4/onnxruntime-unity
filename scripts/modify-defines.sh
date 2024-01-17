@@ -1,7 +1,7 @@
 #!/bin/bash -xe
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
-DEFINES_FILE="$PROJECT_DIR/UnityDefines.cs"
+DEFINES_FILE="$PROJECT_DIR/scripts/UnityDefines.cs"
 SRC_ROOT="$PROJECT_DIR/com.github.asus4.onnxruntime/Runtime"
 
 concat_defines() {

@@ -15,9 +15,11 @@ Pre-built ONNX Runtime libraries for Unity.
 - Unity: 2022.3.16f1 (LTS)
 - ONNX Runtime: 1.16.3
 
-### Execution Providers
+### Execution Providers & Extensions
 
-ONNX Runtime supports running on hardware acceleration libraries. See [official docs](https://onnxruntime.ai/docs/execution-providers/).
+#### [Execution Providers](https://onnxruntime.ai/docs/execution-providers/)
+
+Execution Providers are hardware acceleration libraries for each platform. See [official docs](https://onnxruntime.ai/docs/execution-providers/) for more details.
 
 | Platform | CPU | CoreML | NNAPI | CUDA | TensorRT | DirectML | XNNPACK |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -26,6 +28,18 @@ ONNX Runtime supports running on hardware acceleration libraries. See [official 
 | Android | :white_check_mark: | | :white_check_mark: | | | | :construction: |
 | Windows | :white_check_mark: | | | :construction: | :construction: | :white_check_mark: | |
 | Linux | :white_check_mark: | | | :construction: | :construction: | | |
+
+#### [ONNX Runtime Extensions](https://github.com/microsoft/onnxruntime-extensions)
+
+ONNX Runtime Extensions are a set of pre/post processing.
+
+| Platform | Extensions |
+| --- | --- |
+| macOS | :construction: |
+| iOS | :construction: |
+| Android | :construction: |
+| Windows | :construction: |
+| Linux | :construction: |
 
 :white_check_mark: : Supported in Unity Core library  
 :construction: : Experimental Preview
@@ -45,27 +59,19 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     }
   ]
   "dependencies": {
-    // Core library
     "com.github.asus4.onnxruntime": "0.1.8",
-    // (Optional) Utilities for Unity
     "com.github.asus4.onnxruntime.unity": "0.1.8",
-    // (Optional) GPU provider extensions for Windows/Linux (each 300mb+)
-    // CPU for Windows/Linux is included in core library
     "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.8",
     "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.8",
     ... other dependencies
   }
 ```
 
-If you want to get binaries yourself, Run download-binaries.sh command.  
+### What is included in each package
 
-```sh
-# ./download-binaries.sh vX.Y.Z (GitHub release tag)
-./download-binaries.sh v1.16.3
-```
-
-## Links for libraries
-
-- [macOS](https://github.com/microsoft/onnxruntime/releases/)
-- [Android](https://central.sonatype.com/artifact/com.microsoft.onnxruntime/onnxruntime-android/versions)
-- [iOS](https://github.com/CocoaPods/Specs/tree/master/Specs/3/a/a/onnxruntime-c)
+- `com.github.asus4.onnxruntime` : Core library
+  - CPU provider for all platforms
+  - GPU provider for iOS, Android, macOS and Windows(only DirectML)
+- `com.github.asus4.onnxruntime.unity` : (Optional) Utilities for Unity
+- `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
+- `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux

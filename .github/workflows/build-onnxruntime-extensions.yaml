@@ -27,7 +27,7 @@ jobs:
             - artifact-name: win-x64
               run-os: windows-latest
               build-script: cmd /c .\build_lib.bat --x64 --build_dir out --config RelWithDebInfo --parallel --cmake_generator "Visual Studio 17 2022" --cmake_extra_defines OCOS_ONNXRUNTIME_VERSION="$ORT_VERSION"
-              artifact-path: out\RelWithDebInfo\bin\libortextensions.dylib
+              artifact-path: out\RelWithDebInfo\bin\RelWithDebInfo\ortextensions.dll
             - artifact-name: macos-universal
               run-os: macos-latest
               build-script: ./build_lib.sh --build_dir out/ --config RelWithDebInfo --parallel --cmake_extra_defines CMAKE_OSX_ARCHITECTURES="arm64;x86_64" OCOS_ONNXRUNTIME_VERSION="$ORT_VERSION"

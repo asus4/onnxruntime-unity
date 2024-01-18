@@ -14,6 +14,7 @@ Pre-built ONNX Runtime libraries for Unity.
 
 - Unity: 2022.3.16f1 (LTS)
 - ONNX Runtime: 1.16.3
+- ONNX Runtime Extensions: 0.9.0
 
 ### Execution Providers & Extensions
 
@@ -31,7 +32,7 @@ Execution Providers are hardware acceleration libraries for each platform. See [
 
 #### [ONNX Runtime Extensions](https://github.com/microsoft/onnxruntime-extensions)
 
-ONNX Runtime Extensions are a set of pre/post processing.
+ONNX Runtime Extensions are a set of pre/post-processing.
 
 | Platform | Extensions |
 | --- | --- |

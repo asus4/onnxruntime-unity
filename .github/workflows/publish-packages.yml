@@ -21,7 +21,7 @@ jobs:
         id: tmp-cache
         with:
           path: .tmp
-          key: tmp-${{ env.ORT_VERSION }}-${{ hashFiles('scripts/*') }}
+          key: tmp-ort${{ env.ORT_VERSION }}-ext${{ env.ORT_EXTENSIONS_VERSION }}-${{ hashFiles('scripts/*') }}
       - name: Download ONNX libraries
         run: |
           ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}

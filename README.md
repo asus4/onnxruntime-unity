@@ -1,6 +1,6 @@
 # ONNX Runtime Plugin for Unity
 
-[![npm](https://img.shields.io/npm/v/com.github.asus4.onnxruntime?label=npm)](https://www.npmjs.com/package/com.github.asus4.onnxruntime)
+[![upm](https://img.shields.io/npm/v/com.github.asus4.onnxruntime?label=upm)](https://www.npmjs.com/package/com.github.asus4.onnxruntime)
 
 Pre-built ONNX Runtime libraries for Unity.
 

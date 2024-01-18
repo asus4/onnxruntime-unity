@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 env:
   ORT_VERSION: 1.16.3
+  ORT_EXTENSIONS_VERSION: 0.9.0
   # Dry-run on workflow_dispatch
   NPM_OPTS: ${{ github.event_name == 'workflow_dispatch' && '--dry-run' || '' }}
 jobs:
@@ -24,7 +25,8 @@ jobs:
       - name: Download ONNX libraries
         run: |
           ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}
-      - name: Publish all packages
+          ./scripts/download-onnx-extensions-libs.sh ${{ env.ORT_EXTENSIONS_VERSION }}
+      - name: Publish all NPM packages
         run: |
           cp README.md com.github.asus4.*
           npm publish --workspace com.github.asus4.onnxruntime ${{ env.NPM_OPTS }}

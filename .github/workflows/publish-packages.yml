@@ -15,9 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
-      # TODO cache .tmp folder
-      - name: Download libraries
-        run: ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}
+      - name: Cache .tmp folder
+        uses: actions/cache@v4
+        id: tmp-cache
+        with:
+          path: .tmp
+          key: tmp-${{ env.ORT_VERSION }}-${{ hashFiles('scripts/*') }}
+      - name: Download ONNX libraries
+        run: |
+          ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}
       - name: Publish all packages
         run: |
           cp README.md com.github.asus4.*

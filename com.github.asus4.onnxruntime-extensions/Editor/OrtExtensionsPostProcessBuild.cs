@@ -11,13 +11,13 @@ using UnityEditor.iOS.Xcode;
 namespace Microsoft.ML.OnnxRuntime.Editor
 {
     /// <summary>
-    /// Custom post-process build for ONNX Runtime
+    /// Custom post-process build for ONNX Runtime Extensions
     /// </summary>
-    public class OrtPostProcessBuild : IPostprocessBuildWithReport
+    public class OrtExtensionsPostProcessBuild : IPostprocessBuildWithReport
     {
-        private const string PACKAGE_PATH = "Packages/com.github.asus4.onnxruntime";
-        private const string FRAMEWORK_SRC = "Plugins/iOS~/onnxruntime.xcframework";
-        private const string FRAMEWORK_DST = "Libraries/onnxruntime.xcframework";
+        private const string PACKAGE_PATH = "Packages/com.github.asus4.onnxruntime-extensions";
+        private const string FRAMEWORK_SRC = "Plugins/iOS~/onnxruntime_extensions.xcframework";
+        private const string FRAMEWORK_DST = "Libraries/onnxruntime_extensions.xcframework";
 
         public int callbackOrder => 0;
 

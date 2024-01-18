@@ -28,11 +28,10 @@ jobs:
           ./scripts/download-onnx-extensions-libs.sh ${{ env.ORT_EXTENSIONS_VERSION }}
       - name: Publish all NPM packages
         run: |
-          cp README.md com.github.asus4.*
-          npm publish --workspace com.github.asus4.onnxruntime ${{ env.NPM_OPTS }}
-          npm publish --workspace com.github.asus4.onnxruntime.unity ${{ env.NPM_OPTS }}
-          npm publish --workspace com.github.asus4.onnxruntime.linux-x64-gpu ${{ env.NPM_OPTS }}
-          npm publish --workspace com.github.asus4.onnxruntime.win-x64-gpu ${{ env.NPM_OPTS }}
-          npm publish --workspace com.github.asus4.onnxruntime.extensions ${{ env.NPM_OPTS }}
+          for dir in com.github.asus4.*; do
+            cd ${{ github.workspace }}/$dir
+            cp ../README.md .
+            npm publish ${{ env.NPM_OPTS }}
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

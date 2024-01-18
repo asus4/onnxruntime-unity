@@ -11,9 +11,9 @@ set -e -x -u
 # https://mvnrepository.com/artifact/com.microsoft.onnxruntime
 # https://repo1.maven.org/maven2/com/microsoft/onnxruntime/
 
-# Ensure the tag format is like v1.2.3
+# Ensure the tag format is like 1.2.3
 if [[ ! $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Tag $1 is not in the correct format. It should be like `download-binaries.sh 1.2.3`"
+    echo "Tag $1 is not in the correct format. It should be like `$0 1.2.3`"
     exit 1
 fi
 

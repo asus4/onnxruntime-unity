@@ -1,8 +1,12 @@
 name: Publish UPM packages
 on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
+env:
+  ORT_VERSION: 1.16.3
+  # Dry-run on workflow_dispatch
+  NPM_OPTS: ${{ github.event_name == 'workflow_dispatch' && '--dry-run' || '' }}
 jobs:
   npm-publish:
     runs-on: ubuntu-latest
@@ -11,20 +15,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
-      - name: Download binaries
-        run: ./scripts/download-binaries.sh v1.16.3
+      # TODO cache .tmp folder
+      - name: Download libraries
+        run: ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}
       - name: Publish all packages
         run: |
           cp README.md com.github.asus4.*
-          cd ${{ github.workspace }}/com.github.asus4.onnxruntime
-          npm publish
-          cd ${{ github.workspace }}/com.github.asus4.onnxruntime.unity
-          npm publish
-          cd ${{ github.workspace }}/com.github.asus4.onnxruntime.linux-x64-gpu
-          npm publish
-          cd ${{ github.workspace }}/com.github.asus4.onnxruntime.win-x64-gpu
-          npm publish
-          cd ${{ github.workspace }}/com.github.asus4.onnxruntime.extensions
-          npm publish
+          npm publish --workspace com.github.asus4.onnxruntime ${{ env.NPM_OPTS }}
+          npm publish --workspace com.github.asus4.onnxruntime.unity ${{ env.NPM_OPTS }}
+          npm publish --workspace com.github.asus4.onnxruntime.linux-x64-gpu ${{ env.NPM_OPTS }}
+          npm publish --workspace com.github.asus4.onnxruntime.win-x64-gpu ${{ env.NPM_OPTS }}
+          npm publish --workspace com.github.asus4.onnxruntime.extensions ${{ env.NPM_OPTS }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

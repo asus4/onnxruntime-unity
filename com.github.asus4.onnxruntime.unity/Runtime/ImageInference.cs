@@ -34,9 +34,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         public Matrix4x4 InputToViewportMatrix => textureToTensor.TransformMatrix;
 
         // Profilers
-        static readonly ProfilerMarker preprocessPerfMarker = new("ImageInference.Preprocess");
-        static readonly ProfilerMarker runPerfMarker = new("ImageInference.Session.Run");
-        static readonly ProfilerMarker postprocessPerfMarker = new("ImageInference.Postprocess");
+        static readonly ProfilerMarker preprocessPerfMarker = new($"{typeof(ImageInference<T>).Name}.Preprocess");
+        static readonly ProfilerMarker runPerfMarker = new($"{typeof(ImageInference<T>).Name}.Session.Run");
+        static readonly ProfilerMarker postprocessPerfMarker = new($"{typeof(ImageInference<T>).Name}.Postprocess");
 
         /// <summary>
         /// Create an inference that has Image input
@@ -48,7 +48,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             try
             {
-                sessionOptions = options.CreateSessionOptions();
+                sessionOptions = new SessionOptions();
+                options.executionProvider.AppendExecutionProviders(sessionOptions);
                 session = new InferenceSession(model, sessionOptions);
             }
             catch (Exception e)

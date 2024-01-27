@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using Unity.Profiling;
 
@@ -18,10 +19,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         protected readonly InferenceSession session;
         protected readonly SessionOptions sessionOptions;
-        protected readonly string[] inputNames;
-        protected readonly OrtValue[] inputs;
-        protected readonly string[] outputNames;
-        protected readonly OrtValue[] outputs;
+        protected readonly ReadOnlyCollection<string> inputNames;
+        protected readonly ReadOnlyCollection<OrtValue> inputs;
+        protected readonly ReadOnlyCollection<string> outputNames;
+        protected readonly ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly TextureToTensor<T> textureToTensor;
 
@@ -61,8 +62,12 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             session.LogIOInfo();
 
             // Allocate inputs/outputs
-            (inputNames, inputs) = AllocateTensors(session.InputMetadata);
-            (outputNames, outputs) = AllocateTensors(session.OutputMetadata);
+            var (inputNames, inputs) = AllocateTensors(session.InputMetadata);
+            var (outputNames, outputs) = AllocateTensors(session.OutputMetadata);
+            this.inputNames = Array.AsReadOnly(inputNames);
+            this.inputs = Array.AsReadOnly(inputs);
+            this.outputNames = Array.AsReadOnly(outputNames);
+            this.outputs = Array.AsReadOnly(outputs);
 
             // Find image input info
             foreach (var kv in session.InputMetadata)

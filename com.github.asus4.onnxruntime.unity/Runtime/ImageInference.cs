@@ -19,9 +19,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         protected readonly InferenceSession session;
         protected readonly SessionOptions sessionOptions;
-        protected readonly ReadOnlyCollection<string> inputNames;
         protected readonly ReadOnlyCollection<OrtValue> inputs;
-        protected readonly ReadOnlyCollection<string> outputNames;
         protected readonly ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly TextureToTensor<T> textureToTensor;
@@ -62,12 +60,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             session.LogIOInfo();
 
             // Allocate inputs/outputs
-            var (inputNames, inputs) = AllocateTensors(session.InputMetadata);
-            var (outputNames, outputs) = AllocateTensors(session.OutputMetadata);
-            this.inputNames = Array.AsReadOnly(inputNames);
-            this.inputs = Array.AsReadOnly(inputs);
-            this.outputNames = Array.AsReadOnly(outputNames);
-            this.outputs = Array.AsReadOnly(outputs);
+            inputs = AllocateTensors(session.InputMetadata);
+            outputs = AllocateTensors(session.OutputMetadata);
 
             // Find image input info
             foreach (var kv in session.InputMetadata)
@@ -122,7 +116,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             // Run inference
             runPerfMarker.Begin();
-            session.Run(null, inputNames, inputs, outputNames, outputs);
+            session.Run(null, session.InputNames, inputs, session.OutputNames, outputs);
             runPerfMarker.End();
 
             // Post process
@@ -143,9 +137,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             // Override this in subclass
         }
 
-        private static (string[], OrtValue[]) AllocateTensors(IReadOnlyDictionary<string, NodeMetadata> metadata)
+        private static ReadOnlyCollection<OrtValue> AllocateTensors(IReadOnlyDictionary<string, NodeMetadata> metadata)
         {
-            var names = new List<string>();
             var values = new List<OrtValue>();
 
             foreach (var kv in metadata)
@@ -153,7 +146,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 NodeMetadata meta = kv.Value;
                 if (meta.IsTensor)
                 {
-                    names.Add(kv.Key);
                     values.Add(meta.CreateTensorOrtValue());
                 }
                 else
@@ -161,7 +153,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                     throw new ArgumentException("Only tensor input is supported");
                 }
             }
-            return (names.ToArray(), values.ToArray());
+            return values.AsReadOnly();
         }
 
         private static bool IsSupportedImage(int[] shape)

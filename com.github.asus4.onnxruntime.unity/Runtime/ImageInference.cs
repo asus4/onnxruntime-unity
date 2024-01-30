@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using Unity.Profiling;
 
@@ -18,10 +19,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         protected readonly InferenceSession session;
         protected readonly SessionOptions sessionOptions;
-        protected readonly string[] inputNames;
-        protected readonly OrtValue[] inputs;
-        protected readonly string[] outputNames;
-        protected readonly OrtValue[] outputs;
+        protected readonly ReadOnlyCollection<OrtValue> inputs;
+        protected readonly ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly TextureToTensor<T> textureToTensor;
 
@@ -34,9 +33,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         public Matrix4x4 InputToViewportMatrix => textureToTensor.TransformMatrix;
 
         // Profilers
-        static readonly ProfilerMarker preprocessPerfMarker = new("ImageInference.Preprocess");
-        static readonly ProfilerMarker runPerfMarker = new("ImageInference.Session.Run");
-        static readonly ProfilerMarker postprocessPerfMarker = new("ImageInference.Postprocess");
+        static readonly ProfilerMarker preprocessPerfMarker = new($"{typeof(ImageInference<T>).Name}.Preprocess");
+        static readonly ProfilerMarker runPerfMarker = new($"{typeof(ImageInference<T>).Name}.Session.Run");
+        static readonly ProfilerMarker postprocessPerfMarker = new($"{typeof(ImageInference<T>).Name}.Postprocess");
 
         /// <summary>
         /// Create an inference that has Image input
@@ -48,7 +47,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             try
             {
-                sessionOptions = options.CreateSessionOptions();
+                sessionOptions = new SessionOptions();
+                options.executionProvider.AppendExecutionProviders(sessionOptions);
                 session = new InferenceSession(model, sessionOptions);
             }
             catch (Exception e)
@@ -60,8 +60,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             session.LogIOInfo();
 
             // Allocate inputs/outputs
-            (inputNames, inputs) = AllocateTensors(session.InputMetadata);
-            (outputNames, outputs) = AllocateTensors(session.OutputMetadata);
+            inputs = AllocateTensors(session.InputMetadata);
+            outputs = AllocateTensors(session.OutputMetadata);
 
             // Find image input info
             foreach (var kv in session.InputMetadata)
@@ -116,7 +116,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             // Run inference
             runPerfMarker.Begin();
-            session.Run(null, inputNames, inputs, outputNames, outputs);
+            session.Run(null, session.InputNames, inputs, session.OutputNames, outputs);
             runPerfMarker.End();
 
             // Post process
@@ -137,9 +137,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             // Override this in subclass
         }
 
-        private static (string[], OrtValue[]) AllocateTensors(IReadOnlyDictionary<string, NodeMetadata> metadata)
+        private static ReadOnlyCollection<OrtValue> AllocateTensors(IReadOnlyDictionary<string, NodeMetadata> metadata)
         {
-            var names = new List<string>();
             var values = new List<OrtValue>();
 
             foreach (var kv in metadata)
@@ -147,7 +146,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 NodeMetadata meta = kv.Value;
                 if (meta.IsTensor)
                 {
-                    names.Add(kv.Key);
                     values.Add(meta.CreateTensorOrtValue());
                 }
                 else
@@ -155,7 +153,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                     throw new ArgumentException("Only tensor input is supported");
                 }
             }
-            return (names.ToArray(), values.ToArray());
+            return values.AsReadOnly();
         }
 
         private static bool IsSupportedImage(int[] shape)

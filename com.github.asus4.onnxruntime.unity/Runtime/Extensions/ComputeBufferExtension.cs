@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
@@ -11,47 +10,18 @@ namespace Microsoft.ML.OnnxRuntime.Unity
     /// </summary>
     public static class ComputeBufferExtension
     {
-        private delegate void SetNativeDataDelegate(IntPtr data, int nativeBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
-        private static readonly Lazy<MethodInfo> setNativeDataMethod = new(() =>
-        {
-            var flags = BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance;
-            return typeof(ComputeBuffer).GetMethod("InternalSetNativeData", flags);
-        });
-
-        private static readonly Dictionary<ComputeBuffer, SetNativeDataDelegate> setNativeDataCache = new();
-
-        private static SetNativeDataDelegate FindSetNativeDataDelegate(this ComputeBuffer buffer)
-        {
-            if (!setNativeDataCache.TryGetValue(buffer, out SetNativeDataDelegate setNativeDataDelegate))
-            {
-                setNativeDataDelegate = (SetNativeDataDelegate)setNativeDataMethod.Value.CreateDelegate(typeof(SetNativeDataDelegate), buffer);
-                setNativeDataCache.Add(buffer, setNativeDataDelegate);
-            }
-            return setNativeDataDelegate;
-        }
-
         public unsafe static void SetData<T>(this ComputeBuffer buffer, ReadOnlySpan<T> data)
             where T : unmanaged
         {
             fixed (T* dataPtr = &data.GetPinnableReference())
             {
-                buffer.SetNativeData((IntPtr)dataPtr, 0, 0, data.Length, sizeof(T));
+                var nativeArr = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    dataPtr, data.Length, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArr, AtomicSafetyHandle.Create());
+#endif
+                buffer.SetData(nativeArr);
             }
-        }
-
-        /// <summary>
-        /// Unsafe: Calling InternalSetNativeData via reflection
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNativeData(this ComputeBuffer buffer, IntPtr data, int nativeBufferStartIndex, int computeBufferStartIndex, int count, int elemSize)
-        {
-            FindSetNativeDataDelegate(buffer)(data, nativeBufferStartIndex, computeBufferStartIndex, count, elemSize);
-        }
-
-        public static void ReleaseWithDelegateCache(this ComputeBuffer buffer)
-        {
-            setNativeDataCache.Remove(buffer);
-            buffer.Release();
         }
     }
 }

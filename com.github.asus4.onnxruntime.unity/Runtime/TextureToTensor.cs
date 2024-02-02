@@ -5,8 +5,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
     using UnityEngine;
 
     /// <summary>
-    /// Port from TextureSource: MIT License
-    /// https://github.com/asus4/TextureSource
+    /// Convert Texture to Onnx Tensor (NCHW layout)
     /// </summary>
     public class TextureToTensor<T> : IDisposable
         where T : unmanaged
@@ -32,11 +31,27 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         private const int CHANNELS = 3; // RGB for now
         public readonly int width;
         public readonly int height;
+        private bool needsDownload = true;
 
         private readonly T[] tensorData;
         public RenderTexture Texture => texture;
-        public ReadOnlySpan<T> TensorData => tensorData;
         public Matrix4x4 TransformMatrix { get; private set; } = Matrix4x4.identity;
+
+        /// <summary>
+        /// Get the latest tensor data as ReadOnlySpan
+        /// </summary>
+        public ReadOnlySpan<T> TensorData
+        {
+            get
+            {
+                if (needsDownload)
+                {
+                    tensor.GetData(tensorData);
+                    needsDownload = false;
+                }
+                return tensorData;
+            }
+        }
 
         public TextureToTensor(int width, int height)
         {
@@ -84,8 +99,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             compute.SetFloats(_StdDev, Std.x, Std.y, Std.z);
 
             compute.Dispatch(kernel, Mathf.CeilToInt(texture.width / 8f), Mathf.CeilToInt(texture.height / 8f), 1);
-
-            tensor.GetData(tensorData);
+            needsDownload = true;
         }
 
         public void Transform(Texture input, Vector2 translate, float eulerRotation, Vector2 scale)

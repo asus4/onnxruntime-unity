@@ -13,8 +13,8 @@ Pre-built ONNX Runtime libraries for Unity.
 ## Tested environment
 
 - Unity: 2022.3.16f1 (LTS)
-- ONNX Runtime: 1.16.3
-- ONNX Runtime Extensions: 0.9.0
+- ONNX Runtime: [1.17.0](https://github.com/microsoft/onnxruntime/releases/tag/v1.17.0)
+- ONNX Runtime Extensions: [0.9.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.9.0)
 
 ### Execution Providers & Extensions
 
@@ -60,11 +60,11 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     }
   ]
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.1.11",
-    "com.github.asus4.onnxruntime.unity": "0.1.11",
-    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.11",
-    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.11",
-    "com.github.asus4.onnxruntime-extensions": "0.1.11",
+    "com.github.asus4.onnxruntime": "0.1.12",
+    "com.github.asus4.onnxruntime.unity": "0.1.12",
+    "com.github.asus4.onnxruntime.win-x64-gpu": "0.1.12",
+    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.1.12",
+    "com.github.asus4.onnxruntime-extensions": "0.1.12",
     ... other dependencies
   }
 ```

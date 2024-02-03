@@ -13,8 +13,8 @@ Pre-built ONNX Runtime libraries for Unity.
 ## Tested environment
 
 - Unity: 2022.3.16f1 (LTS)
-- ONNX Runtime: 1.16.3
-- ONNX Runtime Extensions: 0.9.0
+- ONNX Runtime: [1.17.0](https://github.com/microsoft/onnxruntime/releases/tag/v1.17.0)
+- ONNX Runtime Extensions: [0.9.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.9.0)
 
 ### Execution Providers & Extensions
 

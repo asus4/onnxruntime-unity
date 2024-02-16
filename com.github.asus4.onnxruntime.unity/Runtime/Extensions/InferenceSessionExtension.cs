@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
@@ -51,7 +50,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             {
                 throw new ArgumentException("metadata must be tensor");
             }
-            long[] shape = metadata.Dimensions.Select(x => (long)x).ToArray();
+            long[] shape = Array.ConvertAll(metadata.Dimensions, Convert.ToInt64);
             var ortValue = OrtValue.CreateAllocatedTensorValue(
                 OrtAllocator.DefaultInstance, metadata.ElementDataType, shape);
             return ortValue;

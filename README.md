@@ -8,7 +8,14 @@ Pre-built ONNX Runtime libraries for Unity.
 
 [https://github.com/asus4/onnxruntime-unity-examples](https://github.com/asus4/onnxruntime-unity-examples)
 
+Yolox 
+
 <https://github.com/asus4/onnxruntime-unity-examples/assets/357497/96ed9913-41b7-401d-a634-f0e2de4fc3c7>
+
+NanoSAM  
+
+<https://github.com/asus4/onnxruntime-unity-examples/assets/357497/5e2b8712-87cc-4a3a-82b7-f217087a0ed1>
+
 
 ## Tested environment
 

@@ -1,16 +1,22 @@
+using System;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using UnityEngine;
-
     /// <summary>
     /// Convert Texture to Onnx Tensor (NCHW layout)
     /// </summary>
     public class TextureToTensor<T> : IDisposable
         where T : unmanaged
     {
-        private static ComputeShader compute;
+        private static readonly Lazy<ComputeShader> DefaultCompute = new(() =>
+        {
+            const string path = "com.github.asus4.onnxruntime.unity/TextureToTensor";
+            return Resources.Load<ComputeShader>(path);
+        });
+
         private static readonly int _InputTex = Shader.PropertyToID("_InputTex");
         private static readonly int _OutputTex = Shader.PropertyToID("_OutputTex");
         private static readonly int _OutputTensor = Shader.PropertyToID("_OutputTensor");
@@ -25,6 +31,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         public Vector3 Mean { get; set; } = new Vector3(0.485f, 0.456f, 0.406f);
         public Vector3 Std { get; set; } = new Vector3(0.229f, 0.224f, 0.225f);
 
+        private readonly ComputeShader compute;
         private readonly int kernel;
         private readonly RenderTexture texture;
         private readonly GraphicsBuffer tensor;
@@ -53,7 +60,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
         }
 
-        public TextureToTensor(int width, int height)
+        public TextureToTensor(int width, int height, ComputeShader customCompute = null)
         {
             this.width = width;
             this.height = height;
@@ -71,11 +78,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             tensor = new GraphicsBuffer(GraphicsBuffer.Target.Structured, CHANNELS * width * height, stride);
             tensorData = new T[CHANNELS * width * height];
 
-            if (compute == null)
-            {
-                const string SHADER_PATH = "com.github.asus4.onnxruntime.unity/TextureToTensor";
-                compute = Resources.Load<ComputeShader>(SHADER_PATH);
-            }
+            compute = customCompute != null ? customCompute : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
         }
 

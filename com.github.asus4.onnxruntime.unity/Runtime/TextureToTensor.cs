@@ -132,35 +132,16 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         public static Vector2 GetAspectScale(float srcAspect, float dstAspect, AspectMode mode)
         {
-            switch (mode)
+            bool isSrcWider = srcAspect > dstAspect;
+            return (mode, isSrcWider) switch
             {
-                case AspectMode.None:
-                    return new Vector2(1, 1);
-                case AspectMode.Fit:
-                    if (srcAspect > dstAspect)
-                    {
-                        float s = srcAspect / dstAspect;
-                        return new Vector2(1, s);
-                    }
-                    else
-                    {
-                        float s = dstAspect / srcAspect;
-                        return new Vector2(s, 1);
-                    }
-                case AspectMode.Fill:
-                    if (srcAspect > dstAspect)
-                    {
-                        float s = dstAspect / srcAspect;
-                        return new Vector2(s, 1);
-                    }
-                    else
-                    {
-                        float s = srcAspect / dstAspect;
-                        return new Vector2(1, s);
-                    }
-                default:
-                    throw new Exception("Unknown aspect mode");
-            }
+                (AspectMode.None, _) => new Vector2(1, 1),
+                (AspectMode.Fit, true) => new Vector2(1, srcAspect / dstAspect),
+                (AspectMode.Fit, false) => new Vector2(dstAspect / srcAspect, 1),
+                (AspectMode.Fill, true) => new Vector2(dstAspect / srcAspect, 1),
+                (AspectMode.Fill, false) => new Vector2(1, srcAspect / dstAspect),
+                _ => throw new Exception("Unknown aspect mode"),
+            };
         }
     }
 }

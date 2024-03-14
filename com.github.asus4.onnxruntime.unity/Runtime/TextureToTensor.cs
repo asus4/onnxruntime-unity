@@ -80,6 +80,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             compute = customCompute != null ? customCompute : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
+
+            // Set constant values in ComputeShader
+            compute.SetInts(_OutputSize, width, height);
+            compute.SetBuffer(kernel, _OutputTensor, tensor);
+            compute.SetTexture(kernel, _OutputTex, texture, 0);
         }
 
         public void Dispose()
@@ -94,10 +99,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             TransformMatrix = t;
 
             compute.SetTexture(kernel, _InputTex, input, 0);
-            compute.SetTexture(kernel, _OutputTex, texture, 0);
-            compute.SetBuffer(kernel, _OutputTensor, tensor);
             compute.SetMatrix(_TransformMatrix, t);
-            compute.SetInts(_OutputSize, texture.width, texture.height);
             compute.SetFloats(_Mean, Mean.x, Mean.y, Mean.z);
             compute.SetFloats(_StdDev, Std.x, Std.y, Std.z);
 

@@ -40,6 +40,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// Create an inference that has Image input
         /// </summary>
         /// <param name="model">byte array of the Ort model</param>
+        /// <param name="options">Options for the image inference</param>
         public ImageInference(byte[] model, ImageInferenceOptions options)
         {
             imageOptions = options;
@@ -102,6 +103,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
         }
 
+        /// <summary>
+        /// Run inference with the given texture
+        /// </summary>
+        /// <param name="texture">any type of texture</param>
         public virtual void Run(Texture texture)
         {
             // Pre process
@@ -120,6 +125,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             postprocessPerfMarker.End();
         }
 
+        /// <summary>
+        /// Preprocess to convert texture to tensor.
+        /// Override this method if you need to do custom preprocessing.
+        /// </summary>
+        /// <param name="texture">a texture</param>
         protected virtual void PreProcess(Texture texture)
         {
             textureToTensor.Transform(texture, imageOptions.aspectMode);
@@ -127,11 +137,20 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             textureToTensor.TensorData.CopyTo(inputSpan);
         }
 
+        /// <summary>
+        /// Postprocess to convert tensor to output.
+        /// Need to override this method to get the output.
+        /// </summary>
         protected virtual void PostProcess()
         {
             // Override this in subclass
         }
 
+        /// <summary>
+        /// Create TextureToTensor instance.
+        /// Override this method if you need to use custom TextureToTensor.
+        /// </summary>
+        /// <returns>A TextureToTensor<typeparamref name="T"/> instance</returns>
         protected virtual TextureToTensor<T> CreateTextureToTensor()
         {
             return new TextureToTensor<T>(width, height)

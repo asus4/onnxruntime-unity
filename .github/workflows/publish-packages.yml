@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 env:
   ORT_VERSION: 1.17.3
-  ORT_EXTENSIONS_VERSION: 0.10.1
+  ORT_EXTENSIONS_VERSION: 0.10.0
   # Dry-run on workflow_dispatch
   NPM_OPTS: ${{ github.event_name == 'workflow_dispatch' && '--dry-run' || '' }}
 jobs:

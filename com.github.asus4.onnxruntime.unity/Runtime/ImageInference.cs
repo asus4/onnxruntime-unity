@@ -23,7 +23,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected readonly ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly TextureToTensor<T> textureToTensor;
-
         protected readonly string inputImageKey;
         protected readonly int channels;
         protected readonly int height;
@@ -85,11 +84,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 throw new ArgumentException("Image input not found");
             }
 
-            textureToTensor = new TextureToTensor<T>(width, height)
-            {
-                Mean = options.mean,
-                Std = options.std
-            };
+            textureToTensor = CreateTextureToTensor();
         }
 
         public virtual void Dispose()
@@ -135,6 +130,15 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected virtual void PostProcess()
         {
             // Override this in subclass
+        }
+
+        protected virtual TextureToTensor<T> CreateTextureToTensor()
+        {
+            return new TextureToTensor<T>(width, height)
+            {
+                Mean = imageOptions.mean,
+                Std = imageOptions.std
+            };
         }
 
         private static ReadOnlyCollection<OrtValue> AllocateTensors(IReadOnlyDictionary<string, NodeMetadata> metadata)

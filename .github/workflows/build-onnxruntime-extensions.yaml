@@ -11,7 +11,7 @@ on:
         required: false
 env:
   VERSION: ${{ github.event.inputs.version || 'main' }}
-  ORT_VERSION: 1.16.3
+  ORT_VERSION: 1.17.1
 
 jobs:
   # Build for each platform. See example build script at

@@ -80,6 +80,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             compute = customCompute != null ? customCompute : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
+
+            // Set constant values in ComputeShader
+            compute.SetInts(_OutputSize, width, height);
+            compute.SetBuffer(kernel, _OutputTensor, tensor);
+            compute.SetTexture(kernel, _OutputTex, texture, 0);
         }
 
         public void Dispose()
@@ -94,10 +99,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             TransformMatrix = t;
 
             compute.SetTexture(kernel, _InputTex, input, 0);
-            compute.SetTexture(kernel, _OutputTex, texture, 0);
-            compute.SetBuffer(kernel, _OutputTensor, tensor);
             compute.SetMatrix(_TransformMatrix, t);
-            compute.SetInts(_OutputSize, texture.width, texture.height);
             compute.SetFloats(_Mean, Mean.x, Mean.y, Mean.z);
             compute.SetFloats(_StdDev, Std.x, Std.y, Std.z);
 
@@ -130,35 +132,16 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         public static Vector2 GetAspectScale(float srcAspect, float dstAspect, AspectMode mode)
         {
-            switch (mode)
+            bool isSrcWider = srcAspect > dstAspect;
+            return (mode, isSrcWider) switch
             {
-                case AspectMode.None:
-                    return new Vector2(1, 1);
-                case AspectMode.Fit:
-                    if (srcAspect > dstAspect)
-                    {
-                        float s = srcAspect / dstAspect;
-                        return new Vector2(1, s);
-                    }
-                    else
-                    {
-                        float s = dstAspect / srcAspect;
-                        return new Vector2(s, 1);
-                    }
-                case AspectMode.Fill:
-                    if (srcAspect > dstAspect)
-                    {
-                        float s = dstAspect / srcAspect;
-                        return new Vector2(s, 1);
-                    }
-                    else
-                    {
-                        float s = srcAspect / dstAspect;
-                        return new Vector2(1, s);
-                    }
-                default:
-                    throw new Exception("Unknown aspect mode");
-            }
+                (AspectMode.None, _) => new Vector2(1, 1),
+                (AspectMode.Fit, true) => new Vector2(1, srcAspect / dstAspect),
+                (AspectMode.Fit, false) => new Vector2(dstAspect / srcAspect, 1),
+                (AspectMode.Fill, true) => new Vector2(dstAspect / srcAspect, 1),
+                (AspectMode.Fill, false) => new Vector2(1, srcAspect / dstAspect),
+                _ => throw new Exception("Unknown aspect mode"),
+            };
         }
     }
 }

@@ -35,6 +35,7 @@ void TextureToTensor (uint2 id : SV_DispatchThreadID)
 
     _OutputTex[id] = color;
     
+    // TODO: Add shader keywords to enable/disable normalization
     // Normalize
     color.rgb = (color.rgb - _Mean) / _StdDev;
 

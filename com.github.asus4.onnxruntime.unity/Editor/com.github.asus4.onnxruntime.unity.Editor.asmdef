@@ -13,6 +13,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.sentis",
+            "expression": "",
+            "define": "ORT_UNITY_SENTIS_ENABLED"
+        }
+    ],
     "noEngineReferences": false
 }

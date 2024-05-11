@@ -3,7 +3,9 @@ using UnityEngine;
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
     /// <summary>
-    /// Simple asset to hold *.ort file as byte array
+    /// Simple asset to hold *.ort and *.onnx file as byte array
+    /// 
+    /// *.onnx can be imported only when com.unity.sentis is NOT installed
     /// </summary>
     public class OrtAsset : ScriptableObject
     {

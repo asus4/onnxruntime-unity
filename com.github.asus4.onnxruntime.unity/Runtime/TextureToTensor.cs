@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -37,6 +38,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         private readonly RenderTexture texture;
         private readonly GraphicsBuffer tensor;
         private readonly CommandBuffer commands;
+        private readonly bool supportsAsyncCompute;
         public readonly int channels;
         public readonly int width;
         public readonly int height;
@@ -52,9 +54,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         public TextureToTensor(int width, int height, int channels = 3, ComputeShader customCompute = null)
         {
+            this.supportsAsyncCompute = SystemInfo.supportsAsyncCompute;
+            this.channels = channels;
             this.width = width;
             this.height = height;
-            this.channels = channels;
 
             if (channels != 3 && customCompute == null)
             {
@@ -94,37 +97,33 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             commands.Dispose();
         }
 
-        private void BuildCommandBuffer(Texture input, in Matrix4x4 t)
+        /// <summary>
+        /// Convert Texture to Tensor
+        /// </summary>
+        /// <param name="input">An input texture</param>
+        /// <param name="t">A transform matrix</param>
+        public ReadOnlySpan<T> Transform(Texture input, in Matrix4x4 t)
         {
-            TransformMatrix = t;
             commands.Clear();
-            commands.SetComputeTextureParam(compute, kernel, _InputTex, input, 0);
-            commands.SetComputeMatrixParam(compute, _TransformMatrix, t);
-            commands.SetComputeFloatParams(compute, _Mean, Mean.x, Mean.y, Mean.z);
-            commands.SetComputeFloatParams(compute, _StdDev, Std.x, Std.y, Std.z);
-            commands.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / 8f), Mathf.CeilToInt(height / 8f), 1);
-        }
-
-        public void Transform(Texture input, in Matrix4x4 t)
-        {
             BuildCommandBuffer(input, t);
             Graphics.ExecuteCommandBuffer(commands);
             var request = AsyncGPUReadback.RequestIntoNativeArray(ref tensorData, tensor, GpuReadBackCallback);
             request.WaitForCompletion();
+            return tensorData;
         }
 
-        public void Transform(Texture input, Vector2 translate, float eulerRotation, Vector2 scale)
+        public ReadOnlySpan<T> Transform(Texture input, Vector2 translate, float eulerRotation, Vector2 scale)
         {
             Matrix4x4 trs = Matrix4x4.TRS(
                 translate,
                 Quaternion.Euler(0, 0, -eulerRotation),
                 new Vector3(scale.x, scale.y, 1));
-            Transform(input, PopMatrix * trs * PushMatrix);
+            return Transform(input, PopMatrix * trs * PushMatrix);
         }
 
-        public void Transform(Texture input, AspectMode aspectMode)
+        public ReadOnlySpan<T> Transform(Texture input, AspectMode aspectMode)
         {
-            Transform(input, GetAspectScaledMatrix(input, aspectMode));
+            return Transform(input, GetAspectScaledMatrix(input, aspectMode));
         }
 
         public Matrix4x4 GetAspectScaledMatrix(Texture input, AspectMode aspectMode)
@@ -150,6 +149,17 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             };
         }
 
+        private void BuildCommandBuffer(Texture input, in Matrix4x4 t)
+        {
+            TransformMatrix = t;
+
+            commands.SetComputeTextureParam(compute, kernel, _InputTex, input, 0);
+            commands.SetComputeMatrixParam(compute, _TransformMatrix, t);
+            commands.SetComputeFloatParams(compute, _Mean, Mean.x, Mean.y, Mean.z);
+            commands.SetComputeFloatParams(compute, _StdDev, Std.x, Std.y, Std.z);
+            commands.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / 8f), Mathf.CeilToInt(height / 8f), 1);
+        }
+
         private static void GpuReadBackCallback(AsyncGPUReadbackRequest request)
         {
             if (request.hasError)
@@ -157,5 +167,50 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 Debug.LogError("GPU readback error");
             }
         }
+
+        // Awaitable support
+#if UNITY_2023_1_OR_NEWER
+        public async Awaitable<NativeArray<T>.ReadOnly> TransformAsync(Texture input, Matrix4x4 t, CancellationToken cancellationToken)
+        {
+            // Run compute
+            commands.Clear();
+            if (supportsAsyncCompute)
+            {
+                commands.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
+            }
+            BuildCommandBuffer(input, t);
+            if (supportsAsyncCompute)
+            {
+                GraphicsFence fence = commands.CreateAsyncGraphicsFence();
+                Graphics.ExecuteCommandBufferAsync(commands, ComputeQueueType.Background);
+                while (!fence.passed)
+                {
+                    await Awaitable.FixedUpdateAsync(cancellationToken);
+                }
+            }
+            else
+            {
+                Graphics.ExecuteCommandBuffer(commands);
+            }
+            // Get tensor data
+            var request = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref tensorData, tensor);
+            Debug.Assert(!request.hasError, "GPU readback error");
+            return tensorData.AsReadOnly();
+        }
+
+        public Awaitable<NativeArray<T>.ReadOnly> TransformAsync(Texture input, Vector2 translate, float eulerRotation, Vector2 scale, CancellationToken cancellationToken)
+        {
+            Matrix4x4 trs = Matrix4x4.TRS(
+                translate,
+                Quaternion.Euler(0, 0, -eulerRotation),
+                new Vector3(scale.x, scale.y, 1));
+            return TransformAsync(input, PopMatrix * trs * PushMatrix, cancellationToken);
+        }
+
+        public Awaitable<NativeArray<T>.ReadOnly> TransformAsync(Texture input, AspectMode aspectMode, CancellationToken cancellationToken)
+        {
+            return TransformAsync(input, GetAspectScaledMatrix(input, aspectMode), cancellationToken);
+        }
+#endif // UNITY_2023_1_OR_NEWER
     }
 }

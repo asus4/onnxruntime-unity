@@ -37,7 +37,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         private readonly RenderTexture texture;
         private readonly GraphicsBuffer tensor;
         private readonly CommandBuffer commands;
-        private const int CHANNELS = 3; // RGB for now
+        public readonly int channels;
         public readonly int width;
         public readonly int height;
 
@@ -50,10 +50,16 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// </summary>
         public ReadOnlySpan<T> TensorData => tensorData;
 
-        public TextureToTensor(int width, int height, ComputeShader customCompute = null)
+        public TextureToTensor(int width, int height, int channels = 3, ComputeShader customCompute = null)
         {
             this.width = width;
             this.height = height;
+            this.channels = channels;
+
+            if (channels != 3 && customCompute == null)
+            {
+                throw new ArgumentException("Default compute shader only supports 3 channels. Provide custom compute shader.");
+            }
 
             var desc = new RenderTextureDescriptor(width, height, RenderTextureFormat.ARGB32)
             {
@@ -65,8 +71,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             texture.Create();
 
             int stride = Marshal.SizeOf(default(T));
-            tensor = new GraphicsBuffer(GraphicsBuffer.Target.Structured, CHANNELS * width * height, stride);
-            tensorData = new NativeArray<T>(CHANNELS * width * height, Allocator.Persistent);
+            tensor = new GraphicsBuffer(GraphicsBuffer.Target.Structured, channels * width * height, stride);
+            tensorData = new NativeArray<T>(channels * width * height, Allocator.Persistent);
 
             compute = customCompute != null ? customCompute : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");

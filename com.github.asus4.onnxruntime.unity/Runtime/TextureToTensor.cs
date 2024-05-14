@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
-
+using UnityEngine.Rendering;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
@@ -35,30 +36,19 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         private readonly int kernel;
         private readonly RenderTexture texture;
         private readonly GraphicsBuffer tensor;
+        private readonly CommandBuffer commands;
         private const int CHANNELS = 3; // RGB for now
         public readonly int width;
         public readonly int height;
-        private bool needsDownload = true;
 
-        private readonly T[] tensorData;
+        private NativeArray<T> tensorData;
         public RenderTexture Texture => texture;
         public Matrix4x4 TransformMatrix { get; private set; } = Matrix4x4.identity;
 
         /// <summary>
         /// Get the latest tensor data as ReadOnlySpan
         /// </summary>
-        public ReadOnlySpan<T> TensorData
-        {
-            get
-            {
-                if (needsDownload)
-                {
-                    tensor.GetData(tensorData);
-                    needsDownload = false;
-                }
-                return tensorData;
-            }
-        }
+        public ReadOnlySpan<T> TensorData => tensorData;
 
         public TextureToTensor(int width, int height, ComputeShader customCompute = null)
         {
@@ -76,7 +66,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             int stride = Marshal.SizeOf(default(T));
             tensor = new GraphicsBuffer(GraphicsBuffer.Target.Structured, CHANNELS * width * height, stride);
-            tensorData = new T[CHANNELS * width * height];
+            tensorData = new NativeArray<T>(CHANNELS * width * height, Allocator.Persistent);
 
             compute = customCompute != null ? customCompute : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
@@ -85,6 +75,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             compute.SetInts(_OutputSize, width, height);
             compute.SetBuffer(kernel, _OutputTensor, tensor);
             compute.SetTexture(kernel, _OutputTex, texture, 0);
+
+            commands = new CommandBuffer();
         }
 
         public void Dispose()
@@ -92,19 +84,27 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             texture.Release();
             UnityEngine.Object.Destroy(texture);
             tensor.Release();
+            tensorData.Dispose();
+            commands.Dispose();
         }
 
-        public void Transform(Texture input, Matrix4x4 t)
+        private void BuildCommandBuffer(Texture input, in Matrix4x4 t)
         {
             TransformMatrix = t;
+            commands.Clear();
+            commands.SetComputeTextureParam(compute, kernel, _InputTex, input, 0);
+            commands.SetComputeMatrixParam(compute, _TransformMatrix, t);
+            commands.SetComputeFloatParams(compute, _Mean, Mean.x, Mean.y, Mean.z);
+            commands.SetComputeFloatParams(compute, _StdDev, Std.x, Std.y, Std.z);
+            commands.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / 8f), Mathf.CeilToInt(height / 8f), 1);
+        }
 
-            compute.SetTexture(kernel, _InputTex, input, 0);
-            compute.SetMatrix(_TransformMatrix, t);
-            compute.SetFloats(_Mean, Mean.x, Mean.y, Mean.z);
-            compute.SetFloats(_StdDev, Std.x, Std.y, Std.z);
-
-            compute.Dispatch(kernel, Mathf.CeilToInt(texture.width / 8f), Mathf.CeilToInt(texture.height / 8f), 1);
-            needsDownload = true;
+        public void Transform(Texture input, in Matrix4x4 t)
+        {
+            BuildCommandBuffer(input, t);
+            Graphics.ExecuteCommandBuffer(commands);
+            var request = AsyncGPUReadback.RequestIntoNativeArray(ref tensorData, tensor, GpuReadBackCallback);
+            request.WaitForCompletion();
         }
 
         public void Transform(Texture input, Vector2 translate, float eulerRotation, Vector2 scale)
@@ -142,6 +142,14 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 (AspectMode.Fill, false) => new Vector2(1, srcAspect / dstAspect),
                 _ => throw new Exception("Unknown aspect mode"),
             };
+        }
+
+        private static void GpuReadBackCallback(AsyncGPUReadbackRequest request)
+        {
+            if (request.hasError)
+            {
+                Debug.LogError("GPU readback error");
+            }
         }
     }
 }

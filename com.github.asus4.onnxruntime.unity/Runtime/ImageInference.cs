@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Profiling;
 
@@ -85,7 +87,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 throw new ArgumentException("Image input not found");
             }
 
-            textureToTensor = CreateTextureToTensor();
+            textureToTensor = CreateTextureToTensor(width, height);
         }
 
         public virtual void Dispose()
@@ -126,15 +128,42 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         }
 
         /// <summary>
+        /// Run inference with the given texture
+        /// </summary>
+        /// <param name="texture">any type of texture</param>
+        /// <returns>The task</returns>
+        public virtual async Task RunAsync(Texture texture, CancellationToken cancellationToken)
+        {
+            // Pre process
+#if UNITY_2023_1_OR_NEWER
+            await PreProcessAsync(texture, cancellationToken);
+#else
+            PreProcess(texture);
+#endif // UNITY_2023_1_OR_NEWER
+
+            // Run inference
+            _ = await session.RunAsync(null, session.InputNames, inputs, session.OutputNames, outputs);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Post process
+#if UNITY_2023_1_OR_NEWER
+            await PostProcessAsync();
+#else
+            PostProcess();
+#endif // UNITY_2023_1_OR_NEWER
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        /// <summary>
         /// Preprocess to convert texture to tensor.
         /// Override this method if you need to do custom preprocessing.
         /// </summary>
         /// <param name="texture">a texture</param>
         protected virtual void PreProcess(Texture texture)
         {
-            textureToTensor.Transform(texture, imageOptions.aspectMode);
             var inputSpan = inputs[0].GetTensorMutableDataAsSpan<T>();
-            textureToTensor.TensorData.CopyTo(inputSpan);
+            var tensorData = textureToTensor.Transform(texture, imageOptions.aspectMode);
+            tensorData.CopyTo(inputSpan);
         }
 
         /// <summary>
@@ -146,12 +175,37 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             // Override this in subclass
         }
 
+        // Awaitable support
+#if UNITY_2023_1_OR_NEWER
+
+        /// <summary>
+        /// Preprocess to convert texture to tensor.
+        /// Override this method if you need to do custom preprocessing.
+        /// </summary>
+        /// <param name="texture">A input texture</param>
+        protected virtual async Awaitable PreProcessAsync(Texture texture, CancellationToken cancellationToken)
+        {
+            var tensorData = await textureToTensor.TransformAsync(texture, imageOptions.aspectMode, cancellationToken);
+            tensorData.AsReadOnlySpan().CopyTo(inputs[0].GetTensorMutableDataAsSpan<T>());
+        }
+
+        /// <summary>
+        /// Async version of Postprocess
+        /// Override this method if you need.
+        /// </summary>
+        protected async virtual Awaitable PostProcessAsync()
+        {
+            await Awaitable.MainThreadAsync();
+            PostProcess();
+        }
+#endif // UNITY_2023_1_OR_NEWER
+
         /// <summary>
         /// Create TextureToTensor instance.
         /// Override this method if you need to use custom TextureToTensor.
         /// </summary>
         /// <returns>A TextureToTensor<typeparamref name="T"/> instance</returns>
-        protected virtual TextureToTensor<T> CreateTextureToTensor()
+        protected virtual TextureToTensor<T> CreateTextureToTensor(int width, int height)
         {
             return new TextureToTensor<T>(width, height)
             {

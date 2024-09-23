@@ -56,7 +56,7 @@ function download_package() {
 
 function download_github_releases() {
     # TODO: consider location of build libraries
-    download_package $1 https://github.com/asus4/onnxruntime-unity/releases/download/v0.1.12/
+    download_package $1 https://github.com/asus4/onnxruntime-unity/releases/download/v0.1.14/
 }
 
 #--------------------------------------
@@ -82,7 +82,9 @@ cp -R $TMP_DIR/pod-archive-onnxruntime-extensions-c-$TAG/onnxruntime_extensions.
 ls $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
 
 # Android
-curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-extensions-android/$TAG/onnxruntime-extensions-android-$TAG.aar -o $PLUGINS_DIR/Android/onnxruntime-extensions-android.aar
+# FIXME: 0.12.0 does not exist
+# curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-extensions-android/$TAG/onnxruntime-extensions-android-$TAG.aar -o $PLUGINS_DIR/Android/onnxruntime-extensions-android.aar
+curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-extensions-android/0.12.4/onnxruntime-extensions-android-0.12.4.aar -o $PLUGINS_DIR/Android/onnxruntime-extensions-android.aar
 
 echo "Done."
 exit 0

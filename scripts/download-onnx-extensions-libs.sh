@@ -56,7 +56,7 @@ function download_package() {
 
 function download_github_releases() {
     # TODO: consider location of build libraries
-    download_package $1 https://github.com/asus4/onnxruntime-unity/releases/download/v0.1.14/
+    download_package $1 https://github.com/asus4/onnxruntime-unity/releases/download/v0.2.0/
 }
 
 #--------------------------------------

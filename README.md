@@ -19,7 +19,7 @@ NanoSAM
 ## Tested environment
 
 - Unity: 2022.3.20f1 (LTS)
-- ONNX Runtime: [1.17.3](https://github.com/microsoft/onnxruntime/releases/tag/v1.17.3)
+- ONNX Runtime: [1.19.2)](https://github.com/microsoft/onnxruntime/releases/tag/v1.19.2)
 - ONNX Runtime Extensions: [0.10.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.10.0)
 
 ### Execution Providers & Extensions

@@ -48,6 +48,9 @@ function download_package() {
     if [[ $FILE_NAME =~ \.zip$ ]]; then
         # unzip into tmp folder if 
         unzip -o $TMP_DIR/$FILE_NAME -d $TMP_DIR/$EXTRACT_DIR
+    # if .nupkg
+    elif [[ $FILE_NAME =~ \.nupkg$ ]]; then
+        unzip -o $TMP_DIR/$FILE_NAME -d $TMP_DIR/$EXTRACT_DIR
     # if .tgz
     elif [[ $FILE_NAME =~ \.tgz$ ]]; then
         tar -xzf $TMP_DIR/$FILE_NAME -C $TMP_DIR/$EXTRACT_DIR
@@ -67,7 +70,7 @@ download_github_releases onnxruntime-osx-universal2-$TAG.tgz
 cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
 
 # Windows x64
-download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.zip
+download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.nupkg
 cp $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML.$TAG/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
 cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/

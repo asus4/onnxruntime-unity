@@ -19,10 +19,10 @@ fi
 
 # Define Variables
 TAG=$1
-PROJCET_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PLUGINS_CORE_DIR="$PROJCET_DIR/com.github.asus4.onnxruntime/Plugins"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
+PLUGINS_CORE_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
 mkdir -p .tmp
-TMP_DIR="$PROJCET_DIR/.tmp"
+TMP_DIR="$PROJECT_DIR/.tmp"
 
 #--------------------------------------
 # Functions
@@ -73,12 +73,12 @@ cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/onnxruntime-osx-universal2-$TAG/
 download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.nupkg
 cp $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML.$TAG/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
-cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJCET_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
+cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Linux x64
 download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
 cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
-cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJCET_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
+cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
 # iOS
 download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net

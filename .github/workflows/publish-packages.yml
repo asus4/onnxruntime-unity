@@ -28,14 +28,14 @@ jobs:
           ./scripts/download-onnx-extensions-libs.sh ${{ env.ORT_EXTENSIONS_VERSION }}
       - name: Publish all NPM packages
         run: |
-          for dir in com.github.asus4.*; do
-            # Skip publishing Linux/Windows GPU as they are too large to upload NPM package
-            if [[ "$dir" == com.github.asus4.onnxruntime.linux-x64-gpu || "$dir" == com.github.asus4.onnxruntime.win-x64-gpu ]]; then
-              continue
-            fi
-            cd ${{ github.workspace }}/$dir
+          publish_npm() {
+            cd $1
             cp ../README.md .
             npm publish ${{ env.NPM_OPTS }}
-          done
+            cd - > /dev/null
+          }
+          publish_npm com.github.asus4.onnxruntime
+          publish_npm com.github.asus4.onnxruntime.unity
+          publish_npm com.github.asus4.onnxruntime-extensions
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

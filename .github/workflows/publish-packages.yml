@@ -30,7 +30,7 @@ jobs:
         run: |
           for dir in com.github.asus4.*; do
             # Skip publishing Linux GPU as it's too big for NPM package
-            if [ "$dir" == "com.github.asus4.linux-x64-gpu" ]; then
+            if [ "$dir" == "com.github.asus4.onnxruntime.linux-x64-gpu" ]; then
               continue
             fi
             cd ${{ github.workspace }}/$dir

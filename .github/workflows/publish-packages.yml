@@ -39,3 +39,13 @@ jobs:
           publish_npm com.github.asus4.onnxruntime-extensions
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upload linux-x64-gpu
+        uses: actions/upload-artifact@v4
+        with:
+          name: com.github.asus4.onnxruntime.linux-x64-gpu
+          path: com.github.asus4.onnxruntime.linux-x64-gpu
+      - name: Upload win-x64-gpu
+        uses: actions/upload-artifact@v4
+        with:
+          name: com.github.asus4.onnxruntime.win-x64-gpu
+          path: com.github.asus4.onnxruntime.win-x64-gpu

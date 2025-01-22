@@ -49,8 +49,15 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             try
             {
-                sessionOptions = new SessionOptions();
-                options.executionProvider.AppendExecutionProviders(sessionOptions);
+                if (options.CustomSessionOptions != null)
+                {
+                    sessionOptions = options.CustomSessionOptions;
+                }
+                else
+                {
+                    sessionOptions = new SessionOptions();
+                    options.executionProvider.AppendExecutionProviders(sessionOptions);
+                }
                 session = new InferenceSession(model, sessionOptions);
             }
             catch (Exception e)

@@ -34,5 +34,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         public Vector3 std = new(0.229f, 0.224f, 0.225f);
 
         public ExecutionProviderOptions executionProvider;
+
+        /// <summary>
+        /// Custom session options. If null, default session options will be created.
+        /// </summary>
+        /// <value>Returns a SessionOptions if provided, otherwise null</value>
+        public SessionOptions CustomSessionOptions { get; set; } = null;
     }
 }

@@ -42,22 +42,16 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// Create an inference that has Image input
         /// </summary>
         /// <param name="model">byte array of the Ort model</param>
-        /// <param name="options">Options for the image inference</param>
-        public ImageInference(byte[] model, ImageInferenceOptions options)
+        /// <param name="imageOptions">Options for the image inference</param>
+        /// <param name="sessionOptions">Custom session options. If null, default session options will be created.</param>
+        public ImageInference(byte[] model, ImageInferenceOptions imageOptions, SessionOptions? sessionOptions = null)
         {
-            imageOptions = options;
+            this.imageOptions = imageOptions;
 
             try
             {
-                if (options.CustomSessionOptions != null)
-                {
-                    sessionOptions = options.CustomSessionOptions;
-                }
-                else
-                {
-                    sessionOptions = new SessionOptions();
-                    options.executionProvider.AppendExecutionProviders(sessionOptions);
-                }
+                this.sessionOptions = sessionOptions ?? new SessionOptions();
+                imageOptions.executionProvider.AppendExecutionProviders(sessionOptions);
                 session = new InferenceSession(model, sessionOptions);
             }
             catch (Exception e)

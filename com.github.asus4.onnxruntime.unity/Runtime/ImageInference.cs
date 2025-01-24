@@ -51,13 +51,13 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             try
             {
                 this.sessionOptions = sessionOptions ?? new SessionOptions();
-                imageOptions.executionProvider.AppendExecutionProviders(sessionOptions);
-                session = new InferenceSession(model, sessionOptions);
+                imageOptions.executionProvider.AppendExecutionProviders(this.sessionOptions);
+                session = new InferenceSession(model, this.sessionOptions);
             }
             catch (Exception e)
             {
                 session?.Dispose();
-                sessionOptions?.Dispose();
+                this.sessionOptions?.Dispose();
                 throw e;
             }
             session.LogIOInfo();

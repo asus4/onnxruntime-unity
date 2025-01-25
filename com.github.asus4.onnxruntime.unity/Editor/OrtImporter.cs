@@ -10,7 +10,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity.Editor
     /// Sentis in installed and want to import the onnx model as OrtAsset,
     /// Select importer the dropdown of the onnx asset
     /// </summary>
+#if ORT_UNITY_SENTIS_ENABLED
     [ScriptedImporter(1, new[] { "ort" }, new[] { "onnx" })]
+#else
+    [ScriptedImporter(1, new[] { "ort", "onnx" })]
+#endif // ORT_UNITY_SENTIS_ENABLED
     public class OrtImporter : ScriptedImporter
     {
         public override void OnImportAsset(AssetImportContext ctx)

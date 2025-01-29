@@ -1,6 +1,6 @@
 {
   "name": "com.github.asus4.onnxruntime",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "displayName": "ONNX Runtime",
   "description": "ONNX Runtime Plugin for Unity",
   "keywords": [

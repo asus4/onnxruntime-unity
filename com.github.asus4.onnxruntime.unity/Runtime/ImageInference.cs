@@ -24,15 +24,22 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected readonly ReadOnlyCollection<OrtValue> inputs;
         protected readonly ReadOnlyCollection<OrtValue> outputs;
 
+        protected readonly bool isDynamicShape;
         protected readonly TextureToTensor<T> textureToTensor;
-        protected readonly string inputImageKey;
-        protected readonly int channels;
-        protected readonly int height;
-        protected readonly int width;
+        protected int channels = -1;
+        protected int height = -1;
+        protected int width = -1;
 
         private bool disposed;
 
+        /// <summary>
+        /// Gets the input texture of the model
+        /// </summary>
         public Texture InputTexture => textureToTensor.Texture;
+
+        /// <summary>
+        /// Gets the input to viewport matrix
+        /// </summary>
         public Matrix4x4 InputToViewportMatrix => textureToTensor.TransformMatrix;
 
         // Profilers
@@ -64,30 +71,27 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
             session.LogIOInfo();
 
+            isDynamicShape = session.ContainsDynamicInput();
+
             // Allocate inputs/outputs
             inputs = AllocateTensors(session.InputMetadata);
             outputs = AllocateTensors(session.OutputMetadata);
 
             // Find image input info
-            foreach (var kv in session.InputMetadata)
+            foreach (var metadata in session.InputMetadata.Values)
             {
-                NodeMetadata meta = kv.Value;
-                if (meta.IsTensor)
+                if (!metadata.IsTensor)
                 {
-                    int[] shape = meta.Dimensions;
-                    if (IsSupportedImage(meta.Dimensions))
-                    {
-                        inputImageKey = kv.Key;
-                        channels = shape[1];
-                        height = shape[2];
-                        width = shape[3];
-                        break;
-                    }
+                    continue;
                 }
-            }
-            if (inputImageKey == null)
-            {
-                throw new ArgumentException("Image input not found");
+                int[] shape = metadata.Dimensions;
+                if (IsSupportedImage(metadata.Dimensions))
+                {
+                    channels = shape[1];
+                    height = shape[2];
+                    width = shape[3];
+                    break;
+                }
             }
 
             textureToTensor = CreateTextureToTensor(width, height);
@@ -267,7 +271,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             };
             // Only RGB is supported for now
             return channels == 3;
-            // return channels == 1 || channels == 3 || channels == 4;
         }
 
     }

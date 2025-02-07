@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
@@ -54,6 +55,26 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             var ortValue = OrtValue.CreateAllocatedTensorValue(
                 OrtAllocator.DefaultInstance, metadata.ElementDataType, shape);
             return ortValue;
+        }
+
+        /// <summary>
+        /// Checks if the NodeMetadata contains dynamic dimensions.
+        /// </summary>
+        /// <param name="metadata">The NodeMetadata to check.</param>
+        /// <returns>True if any dimension is dynamic; otherwise, false.</returns>
+        public static bool ContainsDynamic(this NodeMetadata metadata)
+        {
+            return metadata.Dimensions.Any(d => d < 0);
+        }
+
+        /// <summary>
+        /// Checks if the InferenceSession contains any dynamic input dimensions.
+        /// </summary>
+        /// <param name="session">The InferenceSession to check.</param>
+        /// <returns>True if any input is dynamic; otherwise, false.</returns>
+        public static bool ContainsDynamicInput(this InferenceSession session)
+        {
+            return session.InputMetadata.Values.Any(meta => meta.ContainsDynamic());
         }
     }
 }

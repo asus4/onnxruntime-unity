@@ -146,7 +146,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             // Post process
             postprocessPerfMarker.Begin();
-            PostProcess();
+            PostProcess(outputs);
             postprocessPerfMarker.End();
         }
 
@@ -171,9 +171,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             // Post process
 #if UNITY_2023_1_OR_NEWER
-            await PostProcessAsync();
+            await PostProcessAsync(outputs);
 #else
-            PostProcess();
+            PostProcess(outputs);
 #endif // UNITY_2023_1_OR_NEWER
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -194,7 +194,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// Postprocess to convert tensor to output.
         /// Need to override this method to get the output.
         /// </summary>
-        protected virtual void PostProcess()
+        protected virtual void PostProcess(IReadOnlyList<OrtValue> outputs)
         {
             // Override this in subclass
         }
@@ -217,10 +217,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// Async version of Postprocess
         /// Override this method if you need.
         /// </summary>
-        protected async virtual Awaitable PostProcessAsync()
+        protected async virtual Awaitable PostProcessAsync(IReadOnlyList<OrtValue> outputs)
         {
             await Awaitable.MainThreadAsync();
-            PostProcess();
+            PostProcess(outputs);
         }
 #endif // UNITY_2023_1_OR_NEWER
 

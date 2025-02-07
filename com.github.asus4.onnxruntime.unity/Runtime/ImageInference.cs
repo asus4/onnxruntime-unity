@@ -30,6 +30,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected readonly int height;
         protected readonly int width;
 
+        private bool disposed;
+
         public Texture InputTexture => textureToTensor.Texture;
         public Matrix4x4 InputToViewportMatrix => textureToTensor.TransformMatrix;
 
@@ -91,19 +93,39 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             textureToTensor = CreateTextureToTensor(width, height);
         }
 
-        public virtual void Dispose()
+        ~ImageInference()
         {
-            textureToTensor?.Dispose();
-            session?.Dispose();
-            sessionOptions?.Dispose();
-            foreach (var ortValue in inputs)
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
             {
-                ortValue.Dispose();
+                return;
             }
-            foreach (var ortValue in outputs)
+            if (disposing)
             {
-                ortValue.Dispose();
+                textureToTensor?.Dispose();
+                session?.Dispose();
+                sessionOptions?.Dispose();
+                foreach (var ortValue in inputs)
+                {
+                    ortValue.Dispose();
+                }
+                foreach (var ortValue in outputs)
+                {
+                    ortValue.Dispose();
+                }
             }
+
+            disposed = true;
         }
 
         /// <summary>
@@ -141,6 +163,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 #else
             PreProcess(texture);
 #endif // UNITY_2023_1_OR_NEWER
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Run inference
             _ = await session.RunAsync(null, session.InputNames, inputs, session.OutputNames, outputs);

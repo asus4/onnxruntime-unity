@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -21,12 +22,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         protected readonly InferenceSession session;
         protected readonly SessionOptions sessionOptions;
-        protected readonly ReadOnlyCollection<OrtValue> inputs;
-        protected readonly ReadOnlyCollection<OrtValue> outputs;
+        protected ReadOnlyCollection<OrtValue> inputs;
+        protected ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly bool isDynamicShape;
-        protected readonly TextureToTensor<T> textureToTensor;
-        protected int channels = -1;
+        protected TextureToTensor<T> textureToTensor;
         protected int height = -1;
         protected int width = -1;
 
@@ -71,29 +71,34 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
             session.LogIOInfo();
 
+            // Skip initialization if the model has dynamic shape
             isDynamicShape = session.ContainsDynamicInput();
+            if (isDynamicShape)
+            {
+                inputs = new List<OrtValue>().AsReadOnly();
+                outputs = new List<OrtValue>().AsReadOnly();
+                textureToTensor = CreateTextureToTensor(64, 64);
+                return;
+            }
 
             // Allocate inputs/outputs
             inputs = AllocateTensors(session.InputMetadata);
             outputs = AllocateTensors(session.OutputMetadata);
 
             // Find image input info
-            foreach (var metadata in session.InputMetadata.Values)
+            var shape = session.InputMetadata.Values
+                .Where(metadata => metadata.IsTensor && IsSupportedImage(metadata.Dimensions))
+                .Select(metadata => metadata.Dimensions)
+                .FirstOrDefault();
+            if (shape == null)
             {
-                if (!metadata.IsTensor)
-                {
-                    continue;
-                }
-                int[] shape = metadata.Dimensions;
-                if (IsSupportedImage(metadata.Dimensions))
-                {
-                    channels = shape[1];
-                    height = shape[2];
-                    width = shape[3];
-                    break;
-                }
+                throw new ArgumentException("No supported image input found");
             }
-
+            else
+            {
+                height = shape[2];
+                width = shape[3];
+            }
             textureToTensor = CreateTextureToTensor(width, height);
         }
 
@@ -161,6 +166,12 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <returns>The task</returns>
         public virtual async Task RunAsync(Texture texture, CancellationToken cancellationToken)
         {
+            if (isDynamicShape)
+            {
+                // TODO: implement dynamic shape
+                throw new NotImplementedException();
+            }
+
             // Pre process
 #if UNITY_2023_1_OR_NEWER
             await PreProcessAsync(texture, cancellationToken);
@@ -246,17 +257,13 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         {
             var values = new List<OrtValue>();
 
-            foreach (var kv in metadata)
+            foreach (NodeMetadata meta in metadata.Values)
             {
-                NodeMetadata meta = kv.Value;
-                if (meta.IsTensor)
-                {
-                    values.Add(meta.CreateTensorOrtValue());
-                }
-                else
+                if (!meta.IsTensor)
                 {
                     throw new ArgumentException("Only tensor input is supported");
                 }
+                values.Add(meta.CreateTensorOrtValue());
             }
             return values.AsReadOnly();
         }

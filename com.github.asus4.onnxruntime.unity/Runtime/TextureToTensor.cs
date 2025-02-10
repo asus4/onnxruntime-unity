@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -52,9 +54,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// </summary>
         public ReadOnlySpan<T> TensorData => tensorData;
 
-        public TextureToTensor(int width, int height, int channels = 3, ComputeShader customCompute = null)
+        public TextureToTensor(int width, int height, int channels = 3, ComputeShader? customCompute = null)
         {
-            this.supportsAsyncCompute = SystemInfo.supportsAsyncCompute;
+            supportsAsyncCompute = SystemInfo.supportsAsyncCompute;
             this.channels = channels;
             this.width = width;
             this.height = height;
@@ -77,7 +79,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             tensor = new GraphicsBuffer(GraphicsBuffer.Target.Structured, channels * width * height, stride);
             tensorData = new NativeArray<T>(channels * width * height, Allocator.Persistent);
 
-            compute = customCompute != null ? customCompute : DefaultCompute.Value;
+            compute = customCompute != null
+                ? customCompute
+                : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
 
             // Set constant values in ComputeShader

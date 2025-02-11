@@ -8,14 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Profiling;
-using Unity.Mathematics;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
     /// <summary>
     /// Base class for the model that has image input
     /// </summary>
-    /// <typeparam name="T">Type of model input ex, float or short</typeparam>
+    /// <typeparam name="T">Type of model input. ex: float or short</typeparam>
     public class ImageInference<T> : IDisposable
         where T : unmanaged
     {
@@ -23,13 +22,15 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         protected readonly InferenceSession session;
         protected readonly SessionOptions sessionOptions;
+        protected readonly RunOptions runOptions;
         protected ReadOnlyCollection<OrtValue> inputs;
         protected ReadOnlyCollection<OrtValue> outputs;
 
         protected readonly bool isDynamicInputShape;
+        protected readonly bool isDynamicOutputShape;
         protected TextureToTensor<T> textureToTensor;
-        protected int height = -1;
-        protected int width = -1;
+        protected int Width => textureToTensor.width;
+        protected int Height => textureToTensor.height;
 
         private bool disposed;
 
@@ -63,44 +64,31 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 this.sessionOptions = sessionOptions ?? new SessionOptions();
                 imageOptions.executionProvider.AppendExecutionProviders(this.sessionOptions);
                 session = new InferenceSession(model, this.sessionOptions);
+                runOptions = new RunOptions();
             }
             catch (Exception e)
             {
                 session?.Dispose();
                 this.sessionOptions?.Dispose();
+                runOptions?.Dispose();
                 throw e;
             }
             session.LogIOInfo();
 
-            // Skip initialization if the model has dynamic shape
+            // Check if the model has dynamic shape
             isDynamicInputShape = session.InputMetadata.Values.Any(meta => meta.ContainsDynamic());
-            if (isDynamicInputShape)
-            {
-                textureToTensor = CreateTextureToTensor(64, 64);
-                inputs = new List<OrtValue>().AsReadOnly();
-                outputs = new List<OrtValue>().AsReadOnly();
-                return;
-            }
+            isDynamicOutputShape = session.OutputMetadata.Values.Any(meta => meta.ContainsDynamic());
 
             // Allocate inputs/outputs
-            inputs = AllocateTensors(session.InputMetadata);
-            outputs = AllocateTensors(session.OutputMetadata);
-
-            // Find image input info
-            var shape = session.InputMetadata.Values
-                .Where(metadata => metadata.IsTensor && IsSupportedImage(metadata.Dimensions))
-                .Select(metadata => metadata.Dimensions)
-                .FirstOrDefault();
-            if (shape == null)
-            {
-                throw new ArgumentException("No supported image input found");
-            }
-            else
-            {
-                height = shape[2];
-                width = shape[3];
-            }
-            textureToTensor = CreateTextureToTensor(width, height);
+            inputs = isDynamicInputShape
+                ? new List<OrtValue>().AsReadOnly()
+                : AllocateTensors(session.InputMetadata);
+            outputs = isDynamicOutputShape
+                ? new List<OrtValue>().AsReadOnly()
+                : AllocateTensors(session.OutputMetadata);
+            textureToTensor = isDynamicInputShape
+                ? CreateTextureToTensor(64, 64) // Allocate with dummy size
+                : CreateTextureToTensor(session.InputMetadata);
         }
 
         ~ImageInference()
@@ -125,6 +113,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 textureToTensor?.Dispose();
                 session?.Dispose();
                 sessionOptions?.Dispose();
+                runOptions?.Dispose();
                 foreach (var ortValue in inputs)
                 {
                     ortValue.Dispose();
@@ -149,26 +138,30 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             PreProcess(texture);
             preprocessPerfMarker.End();
 
-            // Run inference
-            runPerfMarker.Begin();
-
-            IReadOnlyList<OrtValue> outputs;
-            if (isDynamicInputShape)
+            if (isDynamicOutputShape)
             {
-                var disposableOutputs = session.Run(null, session.InputNames, inputs, session.OutputNames);
-                outputs = disposableOutputs;
+                // Run inference
+                runPerfMarker.Begin();
+                using var disposableOutputs = session.Run(runOptions, session.InputNames, inputs, session.OutputNames);
+                runPerfMarker.End();
+
+                // Post process
+                postprocessPerfMarker.Begin();
+                PostProcess(disposableOutputs);
+                postprocessPerfMarker.End();
             }
             else
             {
-                session.Run(null, session.InputNames, inputs, session.OutputNames, this.outputs);
-                outputs = this.outputs;
-            }
-            runPerfMarker.End();
+                // Run inference
+                runPerfMarker.Begin();
+                session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+                runPerfMarker.End();
 
-            // Post process
-            postprocessPerfMarker.Begin();
-            PostProcess(outputs);
-            postprocessPerfMarker.End();
+                // Post process
+                postprocessPerfMarker.Begin();
+                PostProcess(outputs);
+                postprocessPerfMarker.End();
+            }
         }
 
         /// <summary>
@@ -212,6 +205,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <param name="texture">a texture</param>
         protected virtual void PreProcess(Texture texture)
         {
+            if (isDynamicInputShape && inputs.Count == 0)
+            {
+                throw new NotSupportedException("Override this method to create inputs");
+            }
             var tensorData = textureToTensor.Transform(texture, imageOptions.aspectMode);
             tensorData.CopyTo(inputs[0].GetTensorMutableDataAsSpan<T>());
         }
@@ -250,6 +247,37 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         }
 #endif // UNITY_2023_1_OR_NEWER
 
+        protected virtual TextureToTensor<T> CreateTextureToTensor(IReadOnlyDictionary<string, NodeMetadata> inputMetadata)
+        {
+            if (isDynamicInputShape)
+            {
+                throw new NotSupportedException("Dynamic shape is not supported. Override this method to create TextureToTensor");
+            }
+
+            // Find image input
+            static bool IsSupportedShape(int[] shape)
+            {
+                int channels = shape.Length switch
+                {
+                    4 => shape[0] == 1 ? shape[1] : 0, // NCWH
+                    3 => shape[0], // CHW
+                    _ => 0
+                };
+                // Only RGB is supported for now
+                return channels == 3;
+            }
+            var shape = inputMetadata.Values
+                .Where(metadata => metadata.IsTensor)
+                .Where(metadata => IsSupportedShape(metadata.Dimensions))
+                .Select(metadata => metadata.Dimensions)
+                .FirstOrDefault()
+                ?? throw new NotSupportedException("No supported input found. Override this method to create TextureToTensor");
+
+            int width = shape[3];
+            int height = shape[2];
+            return CreateTextureToTensor(width, height);
+        }
+
         /// <summary>
         /// Create TextureToTensor instance.
         /// Override this method if you need to use custom TextureToTensor.
@@ -277,34 +305,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 values.Add(meta.CreateTensorOrtValue());
             }
             return values.AsReadOnly();
-        }
-
-        private static bool IsSupportedImage(int[] shape)
-        {
-            int channels = shape.Length switch
-            {
-                4 => shape[0] == 1 ? shape[1] : 0,
-                3 => shape[0],
-                _ => 0
-            };
-            // Only RGB is supported for now
-            return channels == 3;
-        }
-
-        internal static int2 ResizeToMaxSize(int2 size, int maxSize, int alignmentSize = 8)
-        {
-            if (math.all(size <= maxSize))
-            {
-                return size;
-            }
-
-            float aspectRatio = (float)size.x / size.y;
-            float2 sizeF = aspectRatio > 1
-                ? new float2(maxSize, maxSize / aspectRatio)
-                : new float2(maxSize * aspectRatio, maxSize);
-
-            // Round to a multiple of 'alignmentSize'
-            return (int2)math.round(sizeF / alignmentSize) * alignmentSize;
         }
     }
 }

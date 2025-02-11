@@ -30,6 +30,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         [Header("Image Preprocessing")]
         [Tooltip("How to resize the image")]
         public AspectMode aspectMode = AspectMode.Fit;
+        [Tooltip("The maximum image size if the model is dynamic shape")]
+        public int dynamicMaxSize = 640;
         public Vector3 mean = new(0.485f, 0.456f, 0.406f);
         public Vector3 std = new(0.229f, 0.224f, 0.225f);
 

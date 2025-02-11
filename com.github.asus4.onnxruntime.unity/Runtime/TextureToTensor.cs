@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
     /// <summary>
-    /// Convert Texture to Onnx Tensor (NCHW layout)
+    /// Converts Texture to Onnx Tensor (NCHW layout)
     /// </summary>
     public class TextureToTensor<T> : IDisposable
         where T : unmanaged
@@ -198,7 +198,12 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
             // Get tensor data
             var request = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref tensorData, tensor);
-            Debug.Assert(!request.hasError, "GPU readback error");
+            if (request.hasError)
+            {
+                throw new Exception("GPU readback error");
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+
             return tensorData.AsReadOnly();
         }
 

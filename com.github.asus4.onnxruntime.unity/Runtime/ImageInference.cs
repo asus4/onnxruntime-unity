@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Profiling;
+using Unity.Mathematics;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
@@ -25,7 +26,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected ReadOnlyCollection<OrtValue> inputs;
         protected ReadOnlyCollection<OrtValue> outputs;
 
-        protected readonly bool isDynamicShape;
+        protected readonly bool isDynamicInputShape;
         protected TextureToTensor<T> textureToTensor;
         protected int height = -1;
         protected int width = -1;
@@ -72,12 +73,12 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             session.LogIOInfo();
 
             // Skip initialization if the model has dynamic shape
-            isDynamicShape = session.ContainsDynamicInput();
-            if (isDynamicShape)
+            isDynamicInputShape = session.InputMetadata.Values.Any(meta => meta.ContainsDynamic());
+            if (isDynamicInputShape)
             {
+                textureToTensor = CreateTextureToTensor(64, 64);
                 inputs = new List<OrtValue>().AsReadOnly();
                 outputs = new List<OrtValue>().AsReadOnly();
-                textureToTensor = CreateTextureToTensor(64, 64);
                 return;
             }
 
@@ -150,7 +151,18 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
             // Run inference
             runPerfMarker.Begin();
-            session.Run(null, session.InputNames, inputs, session.OutputNames, outputs);
+
+            IReadOnlyList<OrtValue> outputs;
+            if (isDynamicInputShape)
+            {
+                var disposableOutputs = session.Run(null, session.InputNames, inputs, session.OutputNames);
+                outputs = disposableOutputs;
+            }
+            else
+            {
+                session.Run(null, session.InputNames, inputs, session.OutputNames, this.outputs);
+                outputs = this.outputs;
+            }
             runPerfMarker.End();
 
             // Post process
@@ -166,7 +178,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <returns>The task</returns>
         public virtual async Task RunAsync(Texture texture, CancellationToken cancellationToken)
         {
-            if (isDynamicShape)
+            if (isDynamicInputShape)
             {
                 // TODO: implement dynamic shape
                 throw new NotImplementedException();
@@ -200,9 +212,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <param name="texture">a texture</param>
         protected virtual void PreProcess(Texture texture)
         {
-            var inputSpan = inputs[0].GetTensorMutableDataAsSpan<T>();
             var tensorData = textureToTensor.Transform(texture, imageOptions.aspectMode);
-            tensorData.CopyTo(inputSpan);
+            tensorData.CopyTo(inputs[0].GetTensorMutableDataAsSpan<T>());
         }
 
         /// <summary>
@@ -280,5 +291,20 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             return channels == 3;
         }
 
+        internal static int2 ResizeToMaxSize(int2 size, int maxSize, int alignmentSize = 8)
+        {
+            if (math.all(size <= maxSize))
+            {
+                return size;
+            }
+
+            float aspectRatio = (float)size.x / size.y;
+            float2 sizeF = aspectRatio > 1
+                ? new float2(maxSize, maxSize / aspectRatio)
+                : new float2(maxSize * aspectRatio, maxSize);
+
+            // Round to a multiple of 'alignmentSize'
+            return (int2)math.round(sizeF / alignmentSize) * alignmentSize;
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
@@ -10,7 +11,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
     public static class InferenceSessionExtension
     {
         /// <summary>
-        /// Log input and output information
+        /// Log input and output information of the model
         /// </summary>
         /// <param name="session">An InferenceSession</param>
         [Conditional("DEVELOPMENT_BUILD"), Conditional("UNITY_EDITOR")]
@@ -19,16 +20,21 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             var sb = new StringBuilder();
 
             sb.AppendLine($"Version: {OrtEnv.Instance().GetVersionString()}");
-            sb.AppendLine("Input:");
+
+            // Input
+            bool isDynamicInput = session.InputMetadata.Values.Any(meta => meta.ContainsDynamic());
+            sb.AppendLine(isDynamicInput ? "Dynamic Input:" : "Input:");
             foreach (var kv in session.InputMetadata)
             {
                 string key = kv.Key;
                 NodeMetadata meta = kv.Value;
                 sb.AppendLine($"[{key}] shape: {string.Join(",", meta.Dimensions)}, type: {meta.ElementType} isTensor: {meta.IsTensor}");
             }
-
             sb.AppendLine();
-            sb.AppendLine("Output:");
+
+            // Output
+            bool isDynamicOutput = session.OutputMetadata.Values.Any(meta => meta.ContainsDynamic());
+            sb.AppendLine(isDynamicOutput ? "Dynamic Output:" : "Output:");
             foreach (var meta in session.OutputMetadata)
             {
                 string key = meta.Key;
@@ -54,6 +60,16 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             var ortValue = OrtValue.CreateAllocatedTensorValue(
                 OrtAllocator.DefaultInstance, metadata.ElementDataType, shape);
             return ortValue;
+        }
+
+        /// <summary>
+        /// Checks if the NodeMetadata contains dynamic dimensions.
+        /// </summary>
+        /// <param name="metadata">The NodeMetadata to check.</param>
+        /// <returns>True if any dimension is dynamic; otherwise, false.</returns>
+        public static bool ContainsDynamic(this NodeMetadata metadata)
+        {
+            return metadata.Dimensions.Any(d => d < 0);
         }
     }
 }

@@ -190,30 +190,39 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         // Awaitable support
 #if UNITY_2023_1_OR_NEWER
         /// <summary>
-        /// Run inference with the given texture
+        /// Run inference in background with the given texture
         /// </summary>
         /// <param name="texture">any type of texture</param>
-        /// <returns>The task</returns>
+        /// <returns>The async operation</returns>
         public virtual async Awaitable RunAsync(Texture texture, CancellationToken cancellationToken)
         {
-            if (isDynamicInputShape)
-            {
-                // TODO: implement dynamic shape
-                throw new NotImplementedException();
-            }
             cancellationToken.ThrowIfCancellationRequested();
 
             // Pre process
             await PreProcessAsync(texture, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Run inference
             await Awaitable.BackgroundThreadAsync();
-            session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Post process
-            await PostProcessAsync(outputs, cancellationToken);
+            if (isDynamicInputShape)
+            {
+                // Run inference
+                using var disposableOutputs = session.Run(runOptions, session.InputNames, inputs, session.OutputNames);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Post process
+                await PostProcessAsync(disposableOutputs, cancellationToken);
+            }
+            else
+            {
+                // Run inference
+                session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Post process
+                await PostProcessAsync(outputs, cancellationToken);
+            }
             cancellationToken.ThrowIfCancellationRequested();
         }
 
@@ -224,6 +233,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <param name="texture">A input texture</param>
         protected virtual async Awaitable PreProcessAsync(Texture texture, CancellationToken cancellationToken)
         {
+            if (isDynamicInputShape && inputs.Count == 0)
+            {
+                throw new NotSupportedException("Override this method to create inputs");
+            }
+
             await Awaitable.MainThreadAsync();
             cancellationToken.ThrowIfCancellationRequested();
             var tensorData = await textureToTensor.TransformAsync(texture, imageOptions.aspectMode, cancellationToken);

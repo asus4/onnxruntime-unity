@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Profiling;
 
@@ -165,46 +164,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         }
 
         /// <summary>
-        /// Run inference with the given texture
-        /// </summary>
-        /// <param name="texture">any type of texture</param>
-        /// <returns>The task</returns>
-        public virtual async Task RunAsync(Texture texture, CancellationToken cancellationToken)
-        {
-            if (isDynamicInputShape)
-            {
-                // TODO: implement dynamic shape
-                throw new NotImplementedException();
-            }
-
-            // Pre process
-#if UNITY_2023_1_OR_NEWER
-            await PreProcessAsync(texture, cancellationToken);
-#else
-            PreProcess(texture);
-#endif // UNITY_2023_1_OR_NEWER
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Run inference
-#if UNITY_2023_1_OR_NEWER
-            await Awaitable.BackgroundThreadAsync();
-            session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
-#else
-            // TODO: need to check if this works
-            _ = await session.RunAsync(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
-#endif // UNITY_2023_1_OR_NEWER
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Post process
-#if UNITY_2023_1_OR_NEWER
-            await PostProcessAsync(outputs, cancellationToken);
-#else
-            PostProcess(outputs);
-#endif // UNITY_2023_1_OR_NEWER
-            cancellationToken.ThrowIfCancellationRequested();
-        }
-
-        /// <summary>
         /// Preprocess to convert texture to tensor.
         /// Override this method if you need to do custom preprocessing.
         /// </summary>
@@ -230,6 +189,42 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         // Awaitable support
 #if UNITY_2023_1_OR_NEWER
+        /// <summary>
+        /// Run inference in background with the given texture
+        /// </summary>
+        /// <param name="texture">any type of texture</param>
+        /// <returns>The async operation</returns>
+        public virtual async Awaitable RunAsync(Texture texture, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Pre process
+            await PreProcessAsync(texture, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await Awaitable.BackgroundThreadAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (isDynamicInputShape)
+            {
+                // Run inference
+                using var disposableOutputs = session.Run(runOptions, session.InputNames, inputs, session.OutputNames);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Post process
+                await PostProcessAsync(disposableOutputs, cancellationToken);
+            }
+            else
+            {
+                // Run inference
+                session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Post process
+                await PostProcessAsync(outputs, cancellationToken);
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+        }
 
         /// <summary>
         /// Preprocess to convert texture to tensor.
@@ -238,6 +233,11 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <param name="texture">A input texture</param>
         protected virtual async Awaitable PreProcessAsync(Texture texture, CancellationToken cancellationToken)
         {
+            if (isDynamicInputShape && inputs.Count == 0)
+            {
+                throw new NotSupportedException("Override this method to create inputs");
+            }
+
             await Awaitable.MainThreadAsync();
             cancellationToken.ThrowIfCancellationRequested();
             var tensorData = await textureToTensor.TransformAsync(texture, imageOptions.aspectMode, cancellationToken);

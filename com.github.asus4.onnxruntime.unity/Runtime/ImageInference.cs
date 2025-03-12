@@ -186,7 +186,13 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             cancellationToken.ThrowIfCancellationRequested();
 
             // Run inference
+#if UNITY_2023_1_OR_NEWER
+            await Awaitable.BackgroundThreadAsync();
+            session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+#else
+            // TODO: need to check if this works
             _ = await session.RunAsync(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+#endif // UNITY_2023_1_OR_NEWER
             cancellationToken.ThrowIfCancellationRequested();
 
             // Post process

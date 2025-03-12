@@ -186,7 +186,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             cancellationToken.ThrowIfCancellationRequested();
 
             // Run inference
-            _ = await session.RunAsync(null, session.InputNames, inputs, session.OutputNames, outputs);
+            _ = await session.RunAsync(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
             cancellationToken.ThrowIfCancellationRequested();
 
             // Post process
@@ -232,6 +232,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// <param name="texture">A input texture</param>
         protected virtual async Awaitable PreProcessAsync(Texture texture, CancellationToken cancellationToken)
         {
+            await Awaitable.MainThreadAsync();
             var tensorData = await textureToTensor.TransformAsync(texture, imageOptions.aspectMode, cancellationToken);
             tensorData.AsReadOnlySpan().CopyTo(inputs[0].GetTensorMutableDataAsSpan<T>());
         }

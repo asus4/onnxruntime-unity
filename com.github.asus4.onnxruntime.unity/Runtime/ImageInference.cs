@@ -186,12 +186,18 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             cancellationToken.ThrowIfCancellationRequested();
 
             // Run inference
+#if UNITY_2023_1_OR_NEWER
+            await Awaitable.BackgroundThreadAsync();
+            session.Run(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+#else
+            // TODO: need to check if this works
             _ = await session.RunAsync(runOptions, session.InputNames, inputs, session.OutputNames, outputs);
+#endif // UNITY_2023_1_OR_NEWER
             cancellationToken.ThrowIfCancellationRequested();
 
             // Post process
 #if UNITY_2023_1_OR_NEWER
-            await PostProcessAsync(outputs);
+            await PostProcessAsync(outputs, cancellationToken);
 #else
             PostProcess(outputs);
 #endif // UNITY_2023_1_OR_NEWER
@@ -233,7 +239,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         protected virtual async Awaitable PreProcessAsync(Texture texture, CancellationToken cancellationToken)
         {
             await Awaitable.MainThreadAsync();
+            cancellationToken.ThrowIfCancellationRequested();
             var tensorData = await textureToTensor.TransformAsync(texture, imageOptions.aspectMode, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             tensorData.AsReadOnlySpan().CopyTo(inputs[0].GetTensorMutableDataAsSpan<T>());
         }
 
@@ -241,9 +249,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// Async version of Postprocess
         /// Override this method if you need.
         /// </summary>
-        protected async virtual Awaitable PostProcessAsync(IReadOnlyList<OrtValue> outputs)
+        protected async virtual Awaitable PostProcessAsync(IReadOnlyList<OrtValue> outputs, CancellationToken cancellationToken)
         {
             await Awaitable.MainThreadAsync();
+            cancellationToken.ThrowIfCancellationRequested();
             PostProcess(outputs);
         }
 #endif // UNITY_2023_1_OR_NEWER

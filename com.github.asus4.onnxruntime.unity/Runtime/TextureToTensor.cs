@@ -54,6 +54,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// </summary>
         public ReadOnlySpan<T> TensorData => tensorData;
 
+        private bool disposed;
+
         public TextureToTensor(int width, int height, int channels = 3, ComputeShader? customCompute = null)
         {
             supportsAsyncCompute = SystemInfo.supportsAsyncCompute;
@@ -92,13 +94,33 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             commands = new CommandBuffer();
         }
 
+        ~TextureToTensor()
+        {
+            Dispose(false);
+        }
+
         public void Dispose()
         {
-            texture.Release();
-            UnityEngine.Object.Destroy(texture);
-            tensor.Release();
-            tensorData.Dispose();
-            commands.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                texture.Release();
+                UnityEngine.Object.Destroy(texture);
+                tensor.Release();
+                tensorData.Dispose();
+                commands.Dispose();
+            }
+            disposed = true;
         }
 
         /// <summary>

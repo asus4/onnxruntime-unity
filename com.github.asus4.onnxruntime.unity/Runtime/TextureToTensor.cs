@@ -212,6 +212,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 while (!fence.passed)
                 {
                     await Awaitable.FixedUpdateAsync(cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
             else

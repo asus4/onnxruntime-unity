@@ -2200,6 +2200,7 @@ namespace Microsoft.ML.OnnxRuntime
     // adjust the library name based on platform.
     internal static class OrtExtensionsNativeMethods
     {
+#if ORT_EXTENSION
 #if __ANDROID__
         internal const string ExtensionsDllName = "libortextensions.so";
 #elif __IOS__
@@ -2212,5 +2213,11 @@ namespace Microsoft.ML.OnnxRuntime
                    CallingConvention = CallingConvention.Winapi)]
         public static extern IntPtr /* OrtStatus* */ RegisterCustomOps(IntPtr /* OrtSessionOptions* */ sessionOptions,
                                                                        ref OrtApiBase /* OrtApiBase* */ ortApiBase);
+#else
+        public static IntPtr RegisterCustomOps(IntPtr sessionOptions, ref OrtApiBase ortApiBase)
+        {
+            throw new DllNotFoundException("onnxruntime-extensions is not installed");
+        }
+#endif // ORT_EXTENSION
     }
 } // namespace

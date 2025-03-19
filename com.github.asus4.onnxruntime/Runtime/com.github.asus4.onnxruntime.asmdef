@@ -14,6 +14,11 @@
             "name": "com.github.asus4.onnxruntime.win-x64-gpu",
             "expression": "0.1.4",
             "define": "ORT_GPU_PROVIDER_WIN"
+        },
+        {
+            "name": "com.github.asus4.onnxruntime-extensions",
+            "expression": "0.1.4",
+            "define": "ORT_EXTENSION"
         }
     ],
     "noEngineReferences": true

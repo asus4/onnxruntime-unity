@@ -56,6 +56,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             {
                 throw new ArgumentException("metadata must be tensor");
             }
+            if (metadata.ContainsDynamic())
+            {
+                throw new ArgumentException("Allocate manually when contains dynamic dimensions");
+            }
             long[] shape = Array.ConvertAll(metadata.Dimensions, Convert.ToInt64);
             var ortValue = OrtValue.CreateAllocatedTensorValue(
                 OrtAllocator.DefaultInstance, metadata.ElementDataType, shape);

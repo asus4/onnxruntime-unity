@@ -31,7 +31,8 @@ jobs:
           publish_npm() {
             cd $1
             cp ../README.md .
-            npm publish ${{ env.NPM_OPTS }}
+            # npm publish ${{ env.NPM_OPTS }}
+            npm publish --dry-run
             cd - > /dev/null
           }
           publish_npm com.github.asus4.onnxruntime
@@ -49,3 +50,21 @@ jobs:
         with:
           name: com.github.asus4.onnxruntime.win-x64-gpu
           path: com.github.asus4.onnxruntime.win-x64-gpu
+      - name: Zip folders for GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          zip -r com.github.asus4.onnxruntime-${{ github.ref_name }}.zip com.github.asus4.onnxruntime
+          zip -r com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.unity
+          zip -r com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip com.github.asus4.onnxruntime-extensions
+          zip -r com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.linux-x64-gpu
+          zip -r com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.win-x64-gpu
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            com.github.asus4.onnxruntime-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip

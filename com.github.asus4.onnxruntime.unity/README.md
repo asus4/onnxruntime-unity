@@ -60,11 +60,11 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     }
   ]
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.3.2",
-    "com.github.asus4.onnxruntime.unity": "0.3.2",
-    "com.github.asus4.onnxruntime.win-x64-gpu": "0.3.2",
-    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.3.2",
-    "com.github.asus4.onnxruntime.extensions": "0.3.2",
+    "com.github.asus4.onnxruntime": "0.3.3",
+    "com.github.asus4.onnxruntime.unity": "0.3.3",
+    "com.github.asus4.onnxruntime.win-x64-gpu": "0.3.3",
+    "com.github.asus4.onnxruntime.linux-x64-gpu": "0.3.3",
+    "com.github.asus4.onnxruntime.extensions": "0.3.3",
     ... other dependencies
   }
 ```

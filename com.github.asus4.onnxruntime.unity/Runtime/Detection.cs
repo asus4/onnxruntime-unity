@@ -2,9 +2,8 @@ using System;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Microsoft.ML.OnnxRuntime.Unity;
 
-namespace Microsoft.ML.OnnxRuntime.UnityEx
+namespace Microsoft.ML.OnnxRuntime.Unity
 {
     /// <summary>
     /// Interface for Detection Task

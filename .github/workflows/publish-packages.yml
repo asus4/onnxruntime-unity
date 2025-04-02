@@ -3,6 +3,8 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+permissions:
+  contents: write
 env:
   ORT_VERSION: 1.20.0
   ORT_EXTENSIONS_VERSION: 0.12.0
@@ -39,13 +41,22 @@ jobs:
           publish_npm com.github.asus4.onnxruntime-extensions
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Upload linux-x64-gpu
-        uses: actions/upload-artifact@v4
+      # Upload packages to GitHub release page
+      - name: Zip folders for GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          zip -r com.github.asus4.onnxruntime-${{ github.ref_name }}.zip com.github.asus4.onnxruntime
+          zip -r com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.unity
+          zip -r com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip com.github.asus4.onnxruntime-extensions
+          zip -r com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.linux-x64-gpu
+          zip -r com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.win-x64-gpu
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: com.github.asus4.onnxruntime.linux-x64-gpu
-          path: com.github.asus4.onnxruntime.linux-x64-gpu
-      - name: Upload win-x64-gpu
-        uses: actions/upload-artifact@v4
-        with:
-          name: com.github.asus4.onnxruntime.win-x64-gpu
-          path: com.github.asus4.onnxruntime.win-x64-gpu
+          files: |
+            com.github.asus4.onnxruntime-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip

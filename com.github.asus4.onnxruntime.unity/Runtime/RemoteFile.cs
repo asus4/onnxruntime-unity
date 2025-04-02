@@ -109,7 +109,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             if (request.result != UnityWebRequest.Result.Success)
             {
                 request.Abort();
-                throw new Exception($"Failed to download {request.downloadProgress}: {request.error}");
+                throw new Exception($"Failed to download from {request.url}: {request.error}");
             }
         }
 

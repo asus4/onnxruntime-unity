@@ -33,8 +33,7 @@ jobs:
           publish_npm() {
             cd $1
             cp ../README.md .
-            # npm publish ${{ env.NPM_OPTS }}
-            npm publish --dry-run
+            npm publish ${{ env.NPM_OPTS }}
             cd - > /dev/null
           }
           publish_npm com.github.asus4.onnxruntime

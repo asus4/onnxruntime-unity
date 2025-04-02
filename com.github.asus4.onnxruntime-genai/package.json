@@ -1,0 +1,26 @@
+{
+  "name": "com.github.asus4.onnxruntime-genai",
+  "version": "0.3.3",
+  "displayName": "ONNX Runtime GenAI",
+  "description": "ONNX Runtime Generative AI for Unity",
+  "keywords": [
+    "unity",
+    "onnxruntime"
+  ],
+  "unity": "2022.3",
+  "unityRelease": "0f1",
+  "dependencies": {
+    "com.github.asus4.onnxruntime": "0.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "repository": "https://github.com/asus4/onnxruntime-unity.git"
+  },
+  "documentationUrl": "https://github.com/asus4/onnxruntime-unity",
+  "changelogUrl": "https://github.com/asus4/onnxruntime-unity/releases",
+  "licensesUrl": "https://github.com/asus4/onnxruntime-unity/blob/main/com.github.asus4.onnxruntime/LICENSE",
+  "author": {
+    "name": "Koki Ibukuro",
+    "url": "https://github.com/asus4"
+  }
+}

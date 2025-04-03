@@ -51,8 +51,8 @@ cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/a
 cp $EXTRACT_DIR/osx-x64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/x64/
 
 # Windows
-cp $EXTRACT_DIR/win-arm64/native/onnxruntime-genai.* $PLUGINS_DIR/Windows/arm64/
-cp $EXTRACT_DIR/win-x64/native/onnxruntime-genai.* $PLUGINS_DIR/Windows/x64/
+cp $EXTRACT_DIR/win-arm64/native/onnxruntime-genai.dll $PLUGINS_DIR/Windows/arm64/
+cp $EXTRACT_DIR/win-x64/native/onnxruntime-genai.dll $PLUGINS_DIR/Windows/x64/
 
 # Linux
 # cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime-genai.so $PLUGINS_DIR/Linux/arm64/

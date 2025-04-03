@@ -1,12 +1,12 @@
 fileFormatVersion: 2
-guid: b27b30e4e87554214b41504abd9a3755
+guid: 031e15b7a7fca47fd9956b825b614de5
 PluginImporter:
   externalObjects: {}
   serializedVersion: 3
   iconMap: {}
   executionOrder: {}
   defineConstraints: []
-  isPreloaded: 0
+  isPreloaded: 1
   isOverridable: 1
   isExplicitlyReferenced: 0
   validateReferences: 1
@@ -22,33 +22,33 @@ PluginImporter:
       settings:
         Exclude Android: 1
         Exclude Editor: 0
-        Exclude Linux64: 0
-        Exclude OSXUniversal: 1
-        Exclude Win: 0
-        Exclude Win64: 0
+        Exclude Linux64: 1
+        Exclude OSXUniversal: 0
+        Exclude Win: 1
+        Exclude Win64: 1
         Exclude iOS: 1
     Editor:
       enabled: 1
       settings:
         CPU: x86_64
         DefaultValueInitialized: true
-        OS: Linux
+        OS: OSX
     Linux64:
+      enabled: 0
+      settings:
+        CPU: x86_64
+    OSXUniversal:
       enabled: 1
       settings:
-        CPU: AnyCPU
-    OSXUniversal:
+        CPU: x86_64
+    Win:
+      enabled: 0
+      settings:
+        CPU: x86
+    Win64:
       enabled: 0
       settings:
         CPU: None
-    Win:
-      enabled: 1
-      settings:
-        CPU: AnyCPU
-    Win64:
-      enabled: 1
-      settings:
-        CPU: AnyCPU
     iOS:
       enabled: 0
       settings:

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b27b30e4e87554214b41504abd9a3755
+guid: 61e9efa0c322a4a17869727d5dc86a50
 PluginImporter:
   externalObjects: {}
   serializedVersion: 3
@@ -21,41 +21,41 @@ PluginImporter:
       enabled: 0
       settings:
         Exclude Android: 1
-        Exclude Editor: 0
-        Exclude Linux64: 0
+        Exclude Editor: 1
+        Exclude Linux64: 1
         Exclude OSXUniversal: 1
-        Exclude Win: 0
-        Exclude Win64: 0
-        Exclude iOS: 1
+        Exclude Win: 1
+        Exclude Win64: 1
+        Exclude iOS: 0
     Editor:
-      enabled: 1
-      settings:
-        CPU: x86_64
-        DefaultValueInitialized: true
-        OS: Linux
-    Linux64:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
+        DefaultValueInitialized: true
+        OS: AnyOS
+    Linux64:
+      enabled: 0
+      settings:
+        CPU: None
     OSXUniversal:
       enabled: 0
       settings:
         CPU: None
     Win:
-      enabled: 1
-      settings:
-        CPU: AnyCPU
-    Win64:
-      enabled: 1
-      settings:
-        CPU: AnyCPU
-    iOS:
       enabled: 0
+      settings:
+        CPU: None
+    Win64:
+      enabled: 0
+      settings:
+        CPU: None
+    iOS:
+      enabled: 1
       settings:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: 
+        FrameworkDependencies: MobileCoreServices;CoreML;ImageIO;
   userData: 
   assetBundleName: 
   assetBundleVariant: 

@@ -103,11 +103,15 @@ ls $PLUGINS_DIR/iOS/onnxruntime.xcframework/
 # macOS
 cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
+
+# Windows
+# Microsoft.ML.OnnxRuntime.DirectML for default OnnxRuntime
+EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML-$TAG/runtimes)
+cp $EXTRACT_DIR/win-arm64/native/onnxruntime.dll $PLUGINS_DIR/Windows/arm64/
+cp $EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
+cp $EXTRACT_DIR/win-x86/native/onnxruntime.dll $PLUGINS_DIR/Windows/x86/
 exit 0
 
-# Windows x64
-download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.nupkg
-cp $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML.$TAG/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
 cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 

@@ -2,15 +2,6 @@
 
 set -e -x -u
 
-# Download binaries for each platform
-# Windows, macOS and Linux: We built them in GitHub Actions
-# https://github.com/microsoft/onnxruntime
-# iOS:
-# https://cocoapods.org/
-# Android:
-# https://mvnrepository.com/artifact/com.microsoft.onnxruntime
-# https://repo1.maven.org/maven2/com/microsoft/onnxruntime/
-
 # Ensure the tag format is like 1.2.3
 if [[ ! $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "Tag $1 is not in the correct format. It should be like `$0 1.2.3`"
@@ -28,11 +19,10 @@ TMP_DIR="$PROJCET_DIR/.tmp"
 # Functions
 #--------------------------------------
 
-# Download and extract
-function download_package() {
-    FILE_NAME=$1
-    EXTRACT_DIR=$(echo $FILE_NAME | sed 's/\.[^.]*$//') # Remove the extension
-    BASE_URL=$2
+function download_nuget() {
+    PACKAGE_NAME=$1
+    VERSION=$2
+    EXTRACT_DIR=$(echo $PACKAGE_NAME-$VERSION)
 
     # Skip if the directory already exists
     if [ -d $TMP_DIR/$EXTRACT_DIR ]; then
@@ -40,51 +30,42 @@ function download_package() {
         return
     fi
 
-    # FILES
-    echo "Downloading from $BASE_URL/$FILE_NAME"
+    curl -L https://www.nuget.org/api/v2/package/$PACKAGE_NAME/$VERSION -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg
     mkdir -p $TMP_DIR/$EXTRACT_DIR
-    curl -L $BASE_URL/$FILE_NAME -o $TMP_DIR/$FILE_NAME
-    # If .zip
-    if [[ $FILE_NAME =~ \.zip$ ]]; then
-        # unzip into tmp folder if 
-        unzip -o $TMP_DIR/$FILE_NAME -d $TMP_DIR/$EXTRACT_DIR
-    # if .tgz
-    elif [[ $FILE_NAME =~ \.tgz$ ]]; then
-        tar -xzf $TMP_DIR/$FILE_NAME -C $TMP_DIR/$EXTRACT_DIR
-    fi
-}
-
-function download_github_releases() {
-    # TODO: consider location of build libraries
-    download_package $1 https://github.com/asus4/onnxruntime-unity/releases/download/v0.1.14/
+    unzip -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg -d $TMP_DIR/$EXTRACT_DIR
 }
 
 #--------------------------------------
 # ONNX Runtime
 #--------------------------------------
 
-# macOS Universal
-download_github_releases onnxruntime-extensions-macos-universal-v$TAG.zip
-cp $TMP_DIR/onnxruntime-extensions-macos-universal-v$TAG/libortextensions.dylib $PLUGINS_DIR/macOS/
+# Download binaries from NuGet and place in the Unity package
+# https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime.Extensions/{VERSION}
 
-# Windows x64
-download_github_releases onnxruntime-extensions-win-x64-v$TAG.zip
-cp $TMP_DIR/onnxruntime-extensions-win-x64-v$TAG/ortextensions.dll $PLUGINS_DIR/Windows/x64/
+download_nuget Microsoft.ML.OnnxRuntime.Extensions $TAG
+EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/runtimes)
+# exit 0
 
-# Linux x64
-download_github_releases onnxruntime-extensions-linux-x64-v$TAG.zip
-cp $TMP_DIR/onnxruntime-extensions-linux-x64-v$TAG/libortextensions.so $PLUGINS_DIR/Linux/x64/
+# macOS
+cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
+cp $EXTRACT_DIR/osx.10.14-arm64/native/libortextensions.dylib $PLUGINS_DIR/macOS/arm64/
 
-# iOS
-download_package pod-archive-onnxruntime-extensions-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
-mkdir -p $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
-cp -R $TMP_DIR/pod-archive-onnxruntime-extensions-c-$TAG/onnxruntime_extensions.xcframework/* $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
-ls $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
+# Windows
+cp $EXTRACT_DIR/win-arm64/native/ortextensions.dll $PLUGINS_DIR/Windows/arm64/
+cp $EXTRACT_DIR/win-x64/native/ortextensions.dll $PLUGINS_DIR/Windows/x64/
+# cp $EXTRACT_DIR/win-x86/ortextensions.dll $PLUGINS_DIR/Windows/x86/
+
+# Linux
+cp $EXTRACT_DIR/linux-arm64/native/libortextensions.so $PLUGINS_DIR/Linux/arm64/
+cp $EXTRACT_DIR/linux-x64/native/libortextensions.so $PLUGINS_DIR/Linux/x64/
 
 # Android
-# FIXME: 0.12.0 does not exist
-# curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-extensions-android/$TAG/onnxruntime-extensions-android-$TAG.aar -o $PLUGINS_DIR/Android/onnxruntime-extensions-android.aar
-curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-extensions-android/0.12.4/onnxruntime-extensions-android-0.12.4.aar -o $PLUGINS_DIR/Android/onnxruntime-extensions-android.aar
+cp $EXTRACT_DIR/android/native/onnxruntime-extensions.aar $PLUGINS_DIR/Android/
+
+# iOS xcframework
+rm -rf $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
+mkdir -p $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
 
 echo "Done."
 exit 0

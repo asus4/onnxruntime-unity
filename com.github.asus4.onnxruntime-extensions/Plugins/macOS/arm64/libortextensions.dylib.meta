@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: 442c3bf9bc8094283916b323b60af374
+guid: 48a55e50530a74649bcbd9770aeff059
 PluginImporter:
   externalObjects: {}
-  serializedVersion: 2
+  serializedVersion: 3
   iconMap: {}
   executionOrder: {}
   defineConstraints: []
@@ -11,9 +11,13 @@ PluginImporter:
   isExplicitlyReferenced: 0
   validateReferences: 1
   platformData:
-  - first:
-      : Any
-    second:
+    Android:
+      enabled: 0
+      settings:
+        AndroidLibraryDependee: UnityLibrary
+        AndroidSharedLibraryType: Executable
+        CPU: ARMv7
+    Any:
       enabled: 0
       settings:
         Exclude Android: 1
@@ -23,53 +27,29 @@ PluginImporter:
         Exclude Win: 1
         Exclude Win64: 1
         Exclude iOS: 1
-  - first:
-      Android: Android
-    second:
-      enabled: 0
-      settings:
-        AndroidSharedLibraryType: Executable
-        CPU: ARMv7
-  - first:
-      Any: 
-    second:
-      enabled: 0
-      settings: {}
-  - first:
-      Editor: Editor
-    second:
+    Editor:
       enabled: 1
       settings:
-        CPU: AnyCPU
+        CPU: ARM64
         DefaultValueInitialized: true
         OS: OSX
-  - first:
-      Standalone: Linux64
-    second:
+    Linux64:
       enabled: 0
       settings:
-        CPU: AnyCPU
-  - first:
-      Standalone: OSXUniversal
-    second:
+        CPU: x86_64
+    OSXUniversal:
       enabled: 1
       settings:
-        CPU: AnyCPU
-  - first:
-      Standalone: Win
-    second:
+        CPU: ARM64
+    Win:
       enabled: 0
       settings:
-        CPU: AnyCPU
-  - first:
-      Standalone: Win64
-    second:
+        CPU: x86
+    Win64:
       enabled: 0
       settings:
-        CPU: AnyCPU
-  - first:
-      iPhone: iOS
-    second:
+        CPU: None
+    iOS:
       enabled: 0
       settings:
         AddToEmbeddedBinaries: false

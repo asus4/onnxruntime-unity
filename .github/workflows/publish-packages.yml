@@ -40,6 +40,8 @@ jobs:
           publish_npm com.github.asus4.onnxruntime
           publish_npm com.github.asus4.onnxruntime.unity
           publish_npm com.github.asus4.onnxruntime-extensions
+          publish_npm com.github.asus4.onnxruntime.linux-x64-gpu
+          publish_npm com.github.asus4.onnxruntime.win-x64-gpu
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       # Upload packages to GitHub release page

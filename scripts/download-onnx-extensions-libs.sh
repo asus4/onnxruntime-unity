@@ -39,7 +39,7 @@ function download_nuget() {
 # ONNX Runtime
 #--------------------------------------
 
-# Download binaries from NuGet and place in the Unity package
+# Download NuGet packages and place in the Unity package
 # https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime.Extensions/{VERSION}
 
 download_nuget Microsoft.ML.OnnxRuntime.Extensions $TAG

@@ -20,7 +20,7 @@ fi
 # Define Variables
 TAG=$1
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PLUGINS_CORE_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
+PLUGINS_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
 mkdir -p .tmp
 TMP_DIR="$PROJECT_DIR/.tmp"
 
@@ -61,33 +61,60 @@ function download_github_releases() {
     download_package $1 https://github.com/microsoft/onnxruntime/releases/download/v$TAG
 }
 
+function download_nuget() {
+    PACKAGE_NAME=$1
+    VERSION=$2
+    EXTRACT_DIR=$(echo $PACKAGE_NAME-$VERSION)
+
+    # Skip if the directory already exists
+    if [ -d $TMP_DIR/$EXTRACT_DIR ]; then
+        echo "$EXTRACT_DIR already exists. Skipping download."
+        return
+    fi
+
+    curl -L https://www.nuget.org/api/v2/package/$PACKAGE_NAME/$VERSION -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg
+    mkdir -p $TMP_DIR/$EXTRACT_DIR
+    unzip -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg -d $TMP_DIR/$EXTRACT_DIR
+}
+
 #--------------------------------------
 # ONNX Runtime
 #--------------------------------------
 
-# macOS Universal
-download_github_releases onnxruntime-osx-universal2-$TAG.tgz
-cp -RL $TMP_DIR/onnxruntime-osx-universal2-$TAG/onnxruntime-osx-universal2-$TAG/lib/libonnxruntime.dylib $PLUGINS_CORE_DIR/macOS/libonnxruntime.dylib
+# Download NuGet packages and place in the Unity package
+# https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime/{VERSION}
+
+download_nuget Microsoft.ML.OnnxRuntime $TAG
+download_nuget Microsoft.ML.OnnxRuntime.DirectML $TAG
+download_nuget Microsoft.ML.OnnxRuntime.Gpu.Linux $TAG
+download_nuget Microsoft.ML.OnnxRuntime.Gpu.Windows $TAG
+
+EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/runtimes)
+
+# Android
+cp $EXTRACT_DIR/android/native/onnxruntime.aar $PLUGINS_DIR/Android/
+
+# iOS
+rm -rf $PLUGINS_DIR/iOS/onnxruntime.xcframework
+mkdir -p $PLUGINS_DIR/iOS/onnxruntime.xcframework/
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime.xcframework.zip -d $PLUGINS_DIR/iOS/
+ls $PLUGINS_DIR/iOS/onnxruntime.xcframework/
+
+# macOS
+cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
+cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
+exit 0
 
 # Windows x64
 download_github_releases Microsoft.ML.OnnxRuntime.DirectML.$TAG.nupkg
-cp $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML.$TAG/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_CORE_DIR/Windows/x64/
+cp $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML.$TAG/runtimes/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
 download_github_releases onnxruntime-win-x64-gpu-$TAG.zip
 cp $TMP_DIR/onnxruntime-win-x64-gpu-$TAG/onnxruntime-win-x64-gpu-$TAG/lib/onnxruntime_providers_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Linux x64
 download_github_releases onnxruntime-linux-x64-gpu-$TAG.tgz
-cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_CORE_DIR/Linux/x64/
+cp -RL $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime.so $PLUGINS_DIR/Linux/x64/
 cp $TMP_DIR/onnxruntime-linux-x64-gpu-$TAG/onnxruntime-linux-x64-gpu-$TAG/lib/libonnxruntime_providers_*.so $PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
-
-# iOS
-download_package pod-archive-onnxruntime-c-$TAG.zip https://onnxruntimepackages.z14.web.core.windows.net
-mkdir -p $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
-cp -R $TMP_DIR/pod-archive-onnxruntime-c-$TAG/onnxruntime.xcframework/* $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
-ls $PLUGINS_CORE_DIR/iOS~/onnxruntime.xcframework/
-
-# Android
-curl -L https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/$TAG/onnxruntime-android-$TAG.aar -o $PLUGINS_CORE_DIR/Android/onnxruntime-android.aar
 
 echo "Done."
 exit 0

@@ -11,7 +11,7 @@ fi
 # Define Variables
 TAG=$1
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PLUGINS_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
+PLUGINS_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime-extensions/Plugins"
 TMP_DIR="$PROJECT_DIR/.tmp"
 mkdir -p $TMP_DIR
 
@@ -44,7 +44,6 @@ function download_nuget() {
 
 download_nuget Microsoft.ML.OnnxRuntime.Extensions $TAG
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/runtimes)
-# exit 0
 
 # macOS
 cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
@@ -63,9 +62,9 @@ cp $EXTRACT_DIR/linux-x64/native/libortextensions.so $PLUGINS_DIR/Linux/x64/
 cp $EXTRACT_DIR/android/native/onnxruntime-extensions.aar $PLUGINS_DIR/Android/
 
 # iOS XCFramework
-rm -rf $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
-mkdir -p $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
-unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
+rm -rf $PLUGINS_DIR/iOS/onnxruntime_extensions.xcframework
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $EXTRACT_DIR/ios/native/
+mv $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework $PLUGINS_DIR/iOS/
 
 echo "Done."
 exit 0

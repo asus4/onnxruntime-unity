@@ -25,7 +25,6 @@ Pre-built ONNX Runtime libraries for Unity.
 - Unity: 6000.0.43f1 (LTS)
 - ONNX Runtime: [1.21.0](https://github.com/microsoft/onnxruntime/releases/tag/v1.21.0)
 - ONNX Runtime Extensions: [0.14.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.14.0)
-<!-- - ONNX Runtime Generative AI: [0.7.0](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.7.0) -->
 
 ### Execution Providers & Extensions
 
@@ -75,7 +74,6 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     "com.github.asus4.onnxruntime.unity": "0.3.3",
     "com.github.asus4.onnxruntime.win-x64-gpu": "0.3.3",
     "com.github.asus4.onnxruntime-extensions": "0.3.3",
-    "com.github.asus4.onnxruntime-genai": "0.3.3",
     ... other dependencies
   }
 ```
@@ -89,4 +87,3 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
 - `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
 - `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux
 - `com.github.asus4.onnxruntime-extensions` : (Optional) ONNX Runtime Extensions
-- `com.github.asus4.onnxruntime-genai` : (Optional) ONNX Runtime GenAI Extensions

@@ -10,10 +10,10 @@ fi
 
 # Define Variables
 TAG=$1
-PROJCET_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PLUGINS_DIR="$PROJCET_DIR/com.github.asus4.onnxruntime-extensions/Plugins"
-mkdir -p .tmp
-TMP_DIR="$PROJCET_DIR/.tmp"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
+PLUGINS_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
+TMP_DIR="$PROJECT_DIR/.tmp"
+mkdir -p $TMP_DIR
 
 #--------------------------------------
 # Functions
@@ -62,7 +62,7 @@ cp $EXTRACT_DIR/linux-x64/native/libortextensions.so $PLUGINS_DIR/Linux/x64/
 # Android
 cp $EXTRACT_DIR/android/native/onnxruntime-extensions.aar $PLUGINS_DIR/Android/
 
-# iOS xcframework
+# iOS XCFramework
 rm -rf $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
 mkdir -p $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
 unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework

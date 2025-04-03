@@ -1,6 +1,6 @@
 {
   "name": "com.github.asus4.onnxruntime.linux-x64-gpu",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "displayName": "ONNX Runtime - Linux x64 GPU",
   "description": "ONNX Runtime for Unity - Linux x64 GPU Provider",
   "keywords": [
@@ -10,7 +10,7 @@
   "unity": "2022.3",
   "unityRelease": "0f1",
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.3.3"
+    "com.github.asus4.onnxruntime": "0.3.4"
   },
   "repository": {
     "type": "git",

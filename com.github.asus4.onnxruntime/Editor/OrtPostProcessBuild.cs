@@ -28,7 +28,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             switch (report.summary.platform)
             {
                 case BuildTarget.iOS:
-                    PostprocessBuildIOS(report,
+                    CopyOrtXCFramework(report,
                     PACKAGE_PATH,
                     FRAMEWORK_SRC,
                     FRAMEWORK_DST);
@@ -36,7 +36,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             }
         }
 
-        public static void PostprocessBuildIOS(
+        public static void CopyOrtXCFramework(
             BuildReport report,
             string packagePath,
             string frameworkSrcPath,
@@ -54,10 +54,14 @@ namespace Microsoft.ML.OnnxRuntime.Editor
 
             // Then add to Xcode project
             string frameworkGuid = pbxProject.AddFile(frameworkDstAbsPath, frameworkDstPath, PBXSourceTree.Source);
-            string targetGuid = pbxProject.GetUnityFrameworkTargetGuid();
-            // pbxProject.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
-            string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(targetGuid);
-            pbxProject.AddFileToBuildSection(targetGuid, targetBuildPhaseGuid, frameworkGuid);
+            string unityTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
+            string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(unityTargetGuid);
+            pbxProject.AddFileToBuildSection(unityTargetGuid, targetBuildPhaseGuid, frameworkGuid);
+
+            // TODO: Required only when GenAI is installed
+            // Add to Embed Frameworks in the main target
+            string mainTargetGuid = pbxProject.GetUnityMainTargetGuid();
+            pbxProject.AddFileToEmbedFrameworks(mainTargetGuid, frameworkGuid);
 
             pbxProject.WriteToFile(pbxProjectPath);
 #endif // UNITY_IOS

@@ -2,6 +2,10 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
+#if UNITY_IOS
+using UnityEditor.iOS.Xcode;
+#endif // UNITY_IOS
+
 namespace Microsoft.ML.OnnxRuntime.Extensions.Editor
 {
     using CorePostProcessBuild = Microsoft.ML.OnnxRuntime.Editor.OrtPostProcessBuild;
@@ -22,12 +26,42 @@ namespace Microsoft.ML.OnnxRuntime.Extensions.Editor
             switch (report.summary.platform)
             {
                 case BuildTarget.iOS:
-                    CorePostProcessBuild.PostprocessBuildIOS(report,
+#if UNITY_IOS
+                    CorePostProcessBuild.CopyOrtXCFramework(report,
                         PACKAGE_PATH,
                         FRAMEWORK_SRC,
                         FRAMEWORK_DST);
+                    AddIOSDependentFrameworks(report);
+#endif // UNITY_IOS
                     break;
             }
         }
+
+#if UNITY_IOS
+
+        static void AddFrameworkIfNotExist(PBXProject proj, string targetGuid, string frameworkName, bool weak)
+        {
+            if (proj.ContainsFramework(targetGuid, frameworkName))
+            {
+                return;
+            }
+            proj.AddFrameworkToProject(targetGuid, frameworkName, weak);
+        }
+
+        static void AddIOSDependentFrameworks(BuildReport report)
+        {
+            string pbxProjectPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
+            PBXProject pbxProject = new();
+            pbxProject.ReadFromFile(pbxProjectPath);
+
+            string frameworkGuid = pbxProject.GetUnityFrameworkTargetGuid();
+
+            AddFrameworkIfNotExist(pbxProject, frameworkGuid, "ImageIO.framework", false);
+            AddFrameworkIfNotExist(pbxProject, frameworkGuid, "MobileCoreServices.framework", false);
+
+            pbxProject.WriteToFile(pbxProjectPath);
+        }
+#endif // UNITY_IOS
+
     }
 }

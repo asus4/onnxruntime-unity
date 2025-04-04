@@ -22,7 +22,7 @@ namespace Microsoft.ML.OnnxRuntime.GenAI.Editor
             switch (report.summary.platform)
             {
                 case BuildTarget.iOS:
-                    CorePostProcessBuild.PostprocessBuildIOS(report,
+                    CorePostProcessBuild.CopyOrtXCFramework(report,
                         PACKAGE_PATH,
                         FRAMEWORK_SRC,
                         FRAMEWORK_DST);

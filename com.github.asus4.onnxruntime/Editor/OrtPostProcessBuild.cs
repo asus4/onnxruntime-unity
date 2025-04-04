@@ -36,6 +36,13 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             }
         }
 
+        /// <summary>
+        /// A common method that copies and set options for ONNX Runtime XCFramework in iOS
+        /// </summary>
+        /// <param name="report">A build report</param>
+        /// <param name="packagePath">A package path start from "Packages/com.domain.package"</param>
+        /// <param name="frameworkSrcPath">A source XCFramework path</param>
+        /// <param name="frameworkDstPath">A destination XCFramework path</param>
         public static void CopyOrtXCFramework(
             BuildReport report,
             string packagePath,
@@ -58,10 +65,12 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(unityTargetGuid);
             pbxProject.AddFileToBuildSection(unityTargetGuid, targetBuildPhaseGuid, frameworkGuid);
 
-            // TODO: Required only when GenAI is installed
-            // Add to Embed Frameworks in the main target
+#if ORT_GENAI_ENABLED
+            // NOTE: Required only when GenAI package is installed
+            // GenAI loads the dynamic library in runtime. need to embed in the main target
             string mainTargetGuid = pbxProject.GetUnityMainTargetGuid();
             pbxProject.AddFileToEmbedFrameworks(mainTargetGuid, frameworkGuid);
+#endif // ORT_GENAI_ENABLED
 
             pbxProject.WriteToFile(pbxProjectPath);
 #endif // UNITY_IOS

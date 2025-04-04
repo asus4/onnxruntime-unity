@@ -11,6 +11,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.github.asus4.onnxruntime-genai",
+            "expression": "0.3.5",
+            "define": "ORT_GENAI_ENABLED"
+        }
+    ],
     "noEngineReferences": false
 }

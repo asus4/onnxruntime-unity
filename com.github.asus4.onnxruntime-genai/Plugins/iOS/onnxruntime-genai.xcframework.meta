@@ -26,7 +26,7 @@ PluginImporter:
         Exclude OSXUniversal: 1
         Exclude Win: 1
         Exclude Win64: 1
-        Exclude iOS: 0
+        Exclude iOS: 1
     Editor:
       enabled: 0
       settings:
@@ -50,7 +50,7 @@ PluginImporter:
       settings:
         CPU: None
     iOS:
-      enabled: 1
+      enabled: 0
       settings:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU

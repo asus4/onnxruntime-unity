@@ -10,7 +10,10 @@ using UnityEditor;
 
 namespace Microsoft.ML.OnnxRuntime.Unity
 {
-    public class FilePopupAttribute : PropertyAttribute
+    /// <summary>
+    /// A attribute for "string" that selects relative file path from StreamingAssets folder.
+    /// </summary>
+    public sealed class FilePopupAttribute : PropertyAttribute
     {
         public string regex;
 

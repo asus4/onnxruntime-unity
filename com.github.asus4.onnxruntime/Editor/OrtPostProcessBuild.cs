@@ -57,7 +57,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             // Copy XCFramework to the Xcode project folder
             string frameworkSrcAbsPath = Path.Combine(packagePath, frameworkSrcPath);
             string frameworkDstAbsPath = Path.Combine(report.summary.outputPath, frameworkDstPath);
-            FileUtil.ReplaceDirectory(frameworkSrcAbsPath, frameworkDstAbsPath);
+            CopyDirectory(frameworkSrcAbsPath, frameworkDstAbsPath);
 
             // Then add to Xcode project
             string frameworkGuid = pbxProject.AddFile(frameworkDstAbsPath, frameworkDstPath, PBXSourceTree.Source);
@@ -74,6 +74,15 @@ namespace Microsoft.ML.OnnxRuntime.Editor
 
             pbxProject.WriteToFile(pbxProjectPath);
 #endif // UNITY_IOS
+        }
+
+        static void CopyDirectory(string source, string dest)
+        {
+            if (Directory.Exists(dest) && !FileUtil.DeleteFileOrDirectory(dest))
+            {
+                throw new IOException($"Failed to delete directory '{dest}'.");
+            }
+            FileUtil.CopyFileOrDirectoryFollowSymlinks(source, dest);
         }
     }
 }

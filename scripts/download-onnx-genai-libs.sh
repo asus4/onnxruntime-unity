@@ -62,8 +62,8 @@ cp $EXTRACT_DIR/linux-x64/native/libonnxruntime-genai.so $PLUGINS_DIR/Linux/x64/
 cp $EXTRACT_DIR/android/native/onnxruntime-genai.aar $PLUGINS_DIR/Android/
 
 # iOS xcframework
-rm -rf $PLUGINS_DIR/iOS/onnxruntime-genai.xcframework
-unzip -o $EXTRACT_DIR/ios/native/onnxruntime-genai.xcframework.zip -d $PLUGINS_DIR/iOS/
+rm -rf $PLUGINS_DIR/iOS~/onnxruntime-genai.xcframework
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime-genai.xcframework.zip -d $PLUGINS_DIR/iOS~/
 
 echo "Done."
 exit 0

@@ -62,9 +62,9 @@ cp $EXTRACT_DIR/linux-x64/native/libortextensions.so $PLUGINS_DIR/Linux/x64/
 cp $EXTRACT_DIR/android/native/onnxruntime-extensions.aar $PLUGINS_DIR/Android/
 
 # iOS XCFramework
-rm -rf $PLUGINS_DIR/iOS/onnxruntime_extensions.xcframework
+rm -rf $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
 unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $EXTRACT_DIR/ios/native/
-mv $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework $PLUGINS_DIR/iOS/
+mv $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework $PLUGINS_DIR/iOS~/
 
 echo "Done."
 exit 0

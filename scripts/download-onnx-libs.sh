@@ -53,10 +53,10 @@ EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/runtimes)
 cp $EXTRACT_DIR/android/native/onnxruntime.aar $PLUGINS_DIR/Android/
 
 # iOS XCFramework
-rm -rf $PLUGINS_DIR/iOS/onnxruntime.xcframework
-mkdir -p $PLUGINS_DIR/iOS/onnxruntime.xcframework/
-unzip -o $EXTRACT_DIR/ios/native/onnxruntime.xcframework.zip -d $PLUGINS_DIR/iOS/
-ls $PLUGINS_DIR/iOS/onnxruntime.xcframework/
+rm -rf $PLUGINS_DIR/iOS~/onnxruntime.xcframework
+mkdir -p $PLUGINS_DIR/iOS~/onnxruntime.xcframework/
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime.xcframework.zip -d $PLUGINS_DIR/iOS~/
+ls $PLUGINS_DIR/iOS~/onnxruntime.xcframework/
 
 # macOS
 cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/

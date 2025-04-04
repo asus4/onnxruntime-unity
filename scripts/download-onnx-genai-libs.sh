@@ -51,8 +51,8 @@ cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/a
 cp $EXTRACT_DIR/osx-x64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/x64/
 
 # Windows
-cp $EXTRACT_DIR/win-arm64/native/onnxruntime-genai.* $PLUGINS_DIR/Windows/arm64/
-cp $EXTRACT_DIR/win-x64/native/onnxruntime-genai.* $PLUGINS_DIR/Windows/x64/
+cp $EXTRACT_DIR/win-arm64/native/onnxruntime-genai.dll $PLUGINS_DIR/Windows/arm64/
+cp $EXTRACT_DIR/win-x64/native/onnxruntime-genai.dll $PLUGINS_DIR/Windows/x64/
 
 # Linux
 # cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime-genai.so $PLUGINS_DIR/Linux/arm64/
@@ -63,8 +63,7 @@ cp $EXTRACT_DIR/android/native/onnxruntime-genai.aar $PLUGINS_DIR/Android/
 
 # iOS xcframework
 rm -rf $PLUGINS_DIR/iOS/onnxruntime-genai.xcframework
-mkdir -p $PLUGINS_DIR/iOS~/onnxruntime-genai.xcframework
-unzip -o $EXTRACT_DIR/ios/native/onnxruntime-genai.xcframework.zip -d $PLUGINS_DIR/iOS/onnxruntime-genai.xcframework
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime-genai.xcframework.zip -d $PLUGINS_DIR/iOS/
 
 echo "Done."
 exit 0

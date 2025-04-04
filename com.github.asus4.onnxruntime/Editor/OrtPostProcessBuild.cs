@@ -37,7 +37,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
         }
 
         /// <summary>
-        /// A common method that copies and set options for ONNX Runtime XCFramework in iOS
+        /// A common method that copies and sets options for ONNX Runtime XCFramework in iOS
         /// </summary>
         /// <param name="report">A build report</param>
         /// <param name="packagePath">A package path start from "Packages/com.domain.package"</param>

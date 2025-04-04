@@ -29,6 +29,7 @@ jobs:
         run: |
           ./scripts/download-onnx-libs.sh ${{ env.ORT_VERSION }}
           ./scripts/download-onnx-extensions-libs.sh ${{ env.ORT_EXTENSIONS_VERSION }}
+          ./scripts/download-onnx-genai-libs.sh ${{ env.ORT_GENAI_VERSION }}
       - name: Publish all NPM packages
         run: |
           publish_npm() {
@@ -40,6 +41,7 @@ jobs:
           publish_npm com.github.asus4.onnxruntime
           publish_npm com.github.asus4.onnxruntime.unity
           publish_npm com.github.asus4.onnxruntime-extensions
+          publish_npm com.github.asus4.onnxruntime-genai
           # publish_npm com.github.asus4.onnxruntime.linux-x64-gpu
           # publish_npm com.github.asus4.onnxruntime.win-x64-gpu
         env:
@@ -51,6 +53,7 @@ jobs:
           zip -r com.github.asus4.onnxruntime-${{ github.ref_name }}.zip com.github.asus4.onnxruntime
           zip -r com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.unity
           zip -r com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip com.github.asus4.onnxruntime-extensions
+          zip -r com.github.asus4.onnxruntime-genai-${{ github.ref_name }}.zip com.github.asus4.onnxruntime-genai
           zip -r com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.linux-x64-gpu
           zip -r com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip com.github.asus4.onnxruntime.win-x64-gpu
       - name: Upload release assets
@@ -61,5 +64,6 @@ jobs:
             com.github.asus4.onnxruntime-${{ github.ref_name }}.zip
             com.github.asus4.onnxruntime.unity-${{ github.ref_name }}.zip
             com.github.asus4.onnxruntime-extensions-${{ github.ref_name }}.zip
+            com.github.asus4.onnxruntime-genai-${{ github.ref_name }}.zip
             com.github.asus4.onnxruntime.linux-x64-gpu-${{ github.ref_name }}.zip
             com.github.asus4.onnxruntime.win-x64-gpu-${{ github.ref_name }}.zip

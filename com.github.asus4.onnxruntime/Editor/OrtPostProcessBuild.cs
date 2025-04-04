@@ -36,6 +36,13 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             }
         }
 
+        /// <summary>
+        /// A common method that copies and sets options for ONNX Runtime XCFramework in iOS
+        /// </summary>
+        /// <param name="report">A build report</param>
+        /// <param name="packagePath">A package path starting from "Packages/com.domain.package"</param>
+        /// <param name="frameworkSrcPath">A source XCFramework path</param>
+        /// <param name="frameworkDstPath">A destination XCFramework path</param>
         public static void CopyOrtXCFramework(
             BuildReport report,
             string packagePath,
@@ -50,7 +57,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             // Copy XCFramework to the Xcode project folder
             string frameworkSrcAbsPath = Path.Combine(packagePath, frameworkSrcPath);
             string frameworkDstAbsPath = Path.Combine(report.summary.outputPath, frameworkDstPath);
-            FileUtil.ReplaceDirectory(frameworkSrcAbsPath, frameworkDstAbsPath);
+            CopyDirectory(frameworkSrcAbsPath, frameworkDstAbsPath);
 
             // Then add to Xcode project
             string frameworkGuid = pbxProject.AddFile(frameworkDstAbsPath, frameworkDstPath, PBXSourceTree.Source);
@@ -58,13 +65,24 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(unityTargetGuid);
             pbxProject.AddFileToBuildSection(unityTargetGuid, targetBuildPhaseGuid, frameworkGuid);
 
-            // TODO: Required only when GenAI is installed
-            // Add to Embed Frameworks in the main target
+#if ORT_GENAI_ENABLED
+            // NOTE: Required only when GenAI package is installed
+            // GenAI loads the dynamic library in runtime. need to embed in the main target
             string mainTargetGuid = pbxProject.GetUnityMainTargetGuid();
             pbxProject.AddFileToEmbedFrameworks(mainTargetGuid, frameworkGuid);
+#endif // ORT_GENAI_ENABLED
 
             pbxProject.WriteToFile(pbxProjectPath);
 #endif // UNITY_IOS
+        }
+
+        static void CopyDirectory(string source, string dest)
+        {
+            if (Directory.Exists(dest) && !FileUtil.DeleteFileOrDirectory(dest))
+            {
+                throw new IOException($"Failed to delete directory '{dest}'.");
+            }
+            FileUtil.CopyFileOrDirectoryFollowSymlinks(source, dest);
         }
     }
 }

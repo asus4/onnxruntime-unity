@@ -14,7 +14,7 @@
     "versionDefines": [
         {
             "name": "com.github.asus4.onnxruntime-genai",
-            "expression": "0.3.5",
+            "expression": "0.4.0",
             "define": "ORT_GENAI_ENABLED"
         }
     ],

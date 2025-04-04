@@ -40,7 +40,7 @@ namespace Microsoft.ML.OnnxRuntime.Editor
         /// A common method that copies and sets options for ONNX Runtime XCFramework in iOS
         /// </summary>
         /// <param name="report">A build report</param>
-        /// <param name="packagePath">A package path start from "Packages/com.domain.package"</param>
+        /// <param name="packagePath">A package path starting from "Packages/com.domain.package"</param>
         /// <param name="frameworkSrcPath">A source XCFramework path</param>
         /// <param name="frameworkDstPath">A destination XCFramework path</param>
         public static void CopyOrtXCFramework(

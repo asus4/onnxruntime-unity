@@ -63,8 +63,10 @@ cp $EXTRACT_DIR/android/native/onnxruntime-extensions.aar $PLUGINS_DIR/Android/
 
 # iOS XCFramework
 rm -rf $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework
-unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $EXTRACT_DIR/ios/native/
-mv $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework $PLUGINS_DIR/iOS~/
+unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $PLUGINS_DIR/iOS~/
+rm -rf $PLUGINS_DIR/iOS~/Headers
+rm $PLUGINS_DIR/iOS~/LICENSE
+ls $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
 
 echo "Done."
 exit 0

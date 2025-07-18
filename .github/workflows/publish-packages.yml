@@ -6,9 +6,9 @@ on:
 permissions:
   contents: write
 env:
-  ORT_VERSION: 1.21.0
+  ORT_VERSION: 1.22.1
   ORT_EXTENSIONS_VERSION: 0.14.0
-  ORT_GENAI_VERSION: 0.7.0
+  ORT_GENAI_VERSION: 0.8.3
   # Dry-run on workflow_dispatch
   NPM_OPTS: ${{ github.event_name == 'workflow_dispatch' && '--dry-run' || '' }}
 jobs:

@@ -23,9 +23,9 @@ Pre-built ONNX Runtime libraries for Unity.
 ## Tested environment
 
 - Unity: 6000.0.43f1 (LTS)
-- ONNX Runtime: [1.22.1](https://github.com/microsoft/onnxruntime/releases/tag/v1.22.1)
+- ONNX Runtime: [1.23.2](https://github.com/microsoft/onnxruntime/releases/tag/v1.23.2)
 - ONNX Runtime Extensions: [0.14.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.14.0)
-- ONNX Runtime GenAI: [0.8.3](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.8.3)
+- ONNX Runtime GenAI: [0.11.4](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.11.4)
 
 ### Execution Providers & Extensions
 

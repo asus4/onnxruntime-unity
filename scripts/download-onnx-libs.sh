@@ -43,7 +43,6 @@ function download_nuget() {
 # https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime/{VERSION}
 
 download_nuget Microsoft.ML.OnnxRuntime $TAG
-download_nuget Microsoft.ML.OnnxRuntime.DirectML $TAG
 download_nuget Microsoft.ML.OnnxRuntime.Gpu.Linux $TAG
 download_nuget Microsoft.ML.OnnxRuntime.Gpu.Windows $TAG
 
@@ -62,25 +61,24 @@ ls $PLUGINS_DIR/iOS~/onnxruntime.xcframework/
 cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
 
-# Linux
-# arm64 is not supported by Unity
-# cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime.so $PLUGINS_DIR/Linux/arm64/
-cp $EXTRACT_DIR/linux-x64/native/libonnxruntime.so $PLUGINS_DIR/Linux/x64/
-
-# Microsoft.ML.OnnxRuntime.Gpu.Linux
-EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Linux-$TAG/runtimes)
-cp $EXTRACT_DIR/linux-x64/native/libonnxruntime_*.so $PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
-
 # Windows
-# Microsoft.ML.OnnxRuntime.DirectML for default OnnxRuntime
-EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.DirectML-$TAG/runtimes)
+cp $EXTRACT_DIR/win-arm64/native/onnxruntime.dll $PLUGINS_DIR/Windows/arm64/
 cp $EXTRACT_DIR/win-arm64/native/onnxruntime.dll $PLUGINS_DIR/Windows/arm64/
 cp $EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
-cp $EXTRACT_DIR/win-x86/native/onnxruntime.dll $PLUGINS_DIR/Windows/x86/
+cp $EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
 
 # Microsoft.ML.OnnxRuntime.Gpu.Windows 
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)
 cp $EXTRACT_DIR/win-x64/native/onnxruntime_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
+
+# Linux
+# arm64 is not supported by Unity
+# cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime.so $PLUGINS_DIR/Linux/arm64/
+cp $EXTRACT_DIR/linux-x64/native/*.so $PLUGINS_DIR/Linux/x64/
+
+# Microsoft.ML.OnnxRuntime.Gpu.Linux
+EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Linux-$TAG/runtimes)
+cp $EXTRACT_DIR/linux-x64/native/libonnxruntime_*.so $PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
 
 echo "Done."
 exit 0

@@ -88,3 +88,7 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
 - `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
 - `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux
 - `com.github.asus4.onnxruntime-extensions` : (Optional) ONNX Runtime Extensions
+
+## License
+
+Each package is licensed under the MIT License - see the LICENSE file under the package folder for details.

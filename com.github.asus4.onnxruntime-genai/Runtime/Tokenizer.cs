@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.ML.OnnxRuntimeGenAI
 {
@@ -45,6 +46,31 @@ namespace Microsoft.ML.OnnxRuntimeGenAI
             return result;
         }
 
+        public void UpdateOptions(Dictionary<string, string> options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            // Prepare native arrays
+            string[] keys = new string[options.Count];
+            string[] values = new string[options.Count];
+            int i = 0;
+            foreach (var kvp in options)
+            {
+                keys[i] = kvp.Key;
+                values[i] = kvp.Value;
+                i++;
+            }
+
+            // Call native function
+            Result.VerifySuccess(
+                NativeMethods.OgaUpdateTokenizerOptions(
+                    _tokenizerHandle,
+                    keys,
+                    values,
+                    (UIntPtr)options.Count));
+        }
+
         public Sequences Encode(string str)
         {
             Result.VerifySuccess(NativeMethods.OgaCreateSequences(out IntPtr nativeSequences));
@@ -80,13 +106,47 @@ namespace Microsoft.ML.OnnxRuntimeGenAI
             }
         }
 
+        public string ApplyChatTemplate(string template_str, string messages, string tools, bool add_generation_prompt)
+        {
+            IntPtr outStr = IntPtr.Zero;
+            try
+            {
+                Result.VerifySuccess(NativeMethods.OgaTokenizerApplyChatTemplate(_tokenizerHandle, StringUtils.ToUtf8(template_str), StringUtils.ToUtf8(messages), StringUtils.ToUtf8(tools), add_generation_prompt, out outStr));
+                return StringUtils.FromUtf8(outStr);
+            }
+            finally
+            {
+                NativeMethods.OgaDestroyString(outStr);
+            }
+        }
+
+        public int GetBosTokenId()
+        {
+            Result.VerifySuccess(NativeMethods.OgaTokenizerGetBosTokenId(_tokenizerHandle, out int bosTokenId));
+            return bosTokenId;
+        }
+
+        public ReadOnlySpan<int> GetEosTokenIds()
+        {
+            Result.VerifySuccess(NativeMethods.OgaTokenizerGetEosTokenIds(_tokenizerHandle, out IntPtr eosTokenIds, out UIntPtr tokenCount));
+            unsafe
+            {
+                return new ReadOnlySpan<int>(eosTokenIds.ToPointer(), (int)tokenCount.ToUInt64());
+            }
+        }
+
+        public int GetPadTokenId()
+        {
+            Result.VerifySuccess(NativeMethods.OgaTokenizerGetPadTokenId(_tokenizerHandle, out int padTokenId));
+            return padTokenId;
+        }
+
         public TokenizerStream CreateStream()
         {
             IntPtr tokenizerStreamHandle = IntPtr.Zero;
             Result.VerifySuccess(NativeMethods.OgaCreateTokenizerStream(_tokenizerHandle, out tokenizerStreamHandle));
             return new TokenizerStream(tokenizerStreamHandle);
         }
-
 
         ~Tokenizer()
         {

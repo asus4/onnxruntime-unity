@@ -11,7 +11,7 @@
   "unityRelease": "0f1",
   "repository": {
     "type": "git",
-    "repository": "https://github.com/asus4/onnxruntime-unity.git"
+    "url": "https://github.com/asus4/onnxruntime-unity.git"
   },
   "documentationUrl": "https://github.com/asus4/onnxruntime-unity",
   "changelogUrl": "https://github.com/asus4/onnxruntime-unity/releases",

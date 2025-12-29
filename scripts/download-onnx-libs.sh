@@ -65,14 +65,14 @@ cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
 cp $EXTRACT_DIR/win-arm64/native/*.dll $PLUGINS_DIR/Windows/arm64/
 cp $EXTRACT_DIR/win-x64/native/*.dll $PLUGINS_DIR/Windows/x64/
 
-# Microsoft.ML.OnnxRuntime.Gpu.Windows 
-EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)
-cp $EXTRACT_DIR/win-x64/native/onnxruntime_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
-
 # Linux
 # arm64 is not supported by Unity
 # cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime.so $PLUGINS_DIR/Linux/arm64/
 cp $EXTRACT_DIR/linux-x64/native/*.so $PLUGINS_DIR/Linux/x64/
+
+# Microsoft.ML.OnnxRuntime.Gpu.Windows 
+EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)
+cp $EXTRACT_DIR/win-x64/native/onnxruntime_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
 
 # Microsoft.ML.OnnxRuntime.Gpu.Linux
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Linux-$TAG/runtimes)

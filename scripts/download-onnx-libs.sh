@@ -62,10 +62,8 @@ cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
 
 # Windows
-cp $EXTRACT_DIR/win-arm64/native/onnxruntime.dll $PLUGINS_DIR/Windows/arm64/
-cp $EXTRACT_DIR/win-arm64/native/onnxruntime.dll $PLUGINS_DIR/Windows/arm64/
-cp $EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
-cp $EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
+cp $EXTRACT_DIR/win-arm64/native/*.dll $PLUGINS_DIR/Windows/arm64/
+cp $EXTRACT_DIR/win-x64/native/*.dll $PLUGINS_DIR/Windows/x64/
 
 # Microsoft.ML.OnnxRuntime.Gpu.Windows 
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)

@@ -2,10 +2,26 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.ML.OnnxRuntime
 {
+    /// <summary>
+    /// Represents the compatibility status of a pre-compiled model with one or more execution provider devices.
+    /// </summary>
+    /// <remarks>
+    /// This enum is used to determine whether a pre-compiled model can be used with specific execution providers
+    /// and devices, or if recompilation is needed. 
+    /// </remarks>
+    public enum OrtCompiledModelCompatibility
+    {
+        EP_NOT_APPLICABLE = 0,
+        EP_SUPPORTED_OPTIMAL = 1,
+        EP_SUPPORTED_PREFER_RECOMPILATION = 2,
+        EP_UNSUPPORTED = 3,
+    }
+
     /// <summary>
     /// Delegate for logging function callback.
     /// Supply your function and register it with the environment to receive logging callbacks via
@@ -360,6 +376,31 @@ namespace Microsoft.ML.OnnxRuntime
             }
         }
 
+        /// <summary>
+        /// Validate a compiled model's compatibility information for one or more EP devices.
+        /// </summary>
+        /// <param name="epDevices">The list of EP devices to validate against.</param>
+        /// <param name="compatibilityInfo">The compatibility string from the precompiled model to validate.</param>
+        /// <returns>OrtCompiledModelCompatibility enum value denoting the compatibility status</returns>
+        public OrtCompiledModelCompatibility GetModelCompatibilityForEpDevices(
+            IReadOnlyList<OrtEpDevice> epDevices, string compatibilityInfo)
+        {
+            if (epDevices == null || epDevices.Count == 0)
+                throw new ArgumentException("epDevices must be non-empty", nameof(epDevices));
+
+            var devicePtrs = new IntPtr[epDevices.Count];
+            for (int i = 0; i < epDevices.Count; ++i)
+            {
+                devicePtrs[i] = epDevices[i].Handle;
+            }
+
+            var infoUtf8 = NativeOnnxValueHelper.StringToZeroTerminatedUtf8(compatibilityInfo);
+            NativeApiStatus.VerifySuccess(
+                NativeMethods.OrtGetModelCompatibilityForEpDevices(
+                    devicePtrs, (UIntPtr)devicePtrs.Length, infoUtf8, out int status));
+            return (OrtCompiledModelCompatibility)status;
+        }
+
 
         /// <summary>
         /// Get/Set log level property of OrtEnv instance
@@ -375,6 +416,68 @@ namespace Microsoft.ML.OnnxRuntime
                 _envLogLevel = value;
             }
         }
+
+        /// <summary>
+        /// Register an execution provider library with the OrtEnv instance.
+        /// A registered execution provider library can be used by all sessions created with the OrtEnv instance.
+        /// Devices the execution provider can utilize are added to the values returned by GetEpDevices() and can
+        /// be used in SessionOptions.AppendExecutionProvider to select an execution provider for a device.
+        /// 
+        /// Coming: A selection policy can be specified and ORT will automatically select the best execution providers
+        /// and devices for the model.
+        /// </summary>
+        /// <param name="registrationName">The name to register the library under.</param>
+        /// <param name="libraryPath">The path to the library to register.</param>
+        /// <see cref="GetEpDevices"/>
+        /// <see cref="SessionOptions.AppendExecutionProvider(OrtEnv, IReadOnlyList{OrtEpDevice}, IReadOnlyDictionary{string, string})"/>
+        public void RegisterExecutionProviderLibrary(string registrationName, string libraryPath)
+        {
+            var registrationNameUtf8 = NativeOnnxValueHelper.StringToZeroTerminatedUtf8(registrationName);
+            var pathUtf8 = NativeOnnxValueHelper.GetPlatformSerializedString(libraryPath);
+
+            NativeApiStatus.VerifySuccess(
+                NativeMethods.OrtRegisterExecutionProviderLibrary(handle, registrationNameUtf8, pathUtf8));
+        }
+
+        /// <summary>
+        /// Unregister an execution provider library from the OrtEnv instance.
+        /// </summary>
+        /// <param name="registrationName">The name the library was registered under.</param>
+        public void UnregisterExecutionProviderLibrary(string registrationName)
+        {
+            var registrationNameUtf8 = NativeOnnxValueHelper.StringToZeroTerminatedUtf8(registrationName);
+
+            NativeApiStatus.VerifySuccess(
+                NativeMethods.OrtUnregisterExecutionProviderLibrary(handle, registrationNameUtf8));
+        }
+
+        /// <summary>
+        /// Get the list of all execution provider and device combinations that are available.
+        /// These can be used to select the execution provider and device for a session.
+        /// </summary>
+        /// <see cref="OrtEpDevice"/>
+        /// <see cref="SessionOptions.AppendExecutionProvider(OrtEnv, IReadOnlyList{OrtEpDevice}, IReadOnlyDictionary{string, string})"/>
+        /// <returns></returns>
+        public IReadOnlyList<OrtEpDevice> GetEpDevices()
+        {
+            IntPtr epDevicesPtr;
+            UIntPtr numEpDevices;
+
+            NativeApiStatus.VerifySuccess(NativeMethods.OrtGetEpDevices(handle, out epDevicesPtr, out numEpDevices));
+
+            int count = (int)numEpDevices;
+            var epDevices = new List<OrtEpDevice>(count);
+
+            IntPtr[] epDevicePtrs = new IntPtr[count];
+            Marshal.Copy(epDevicesPtr, epDevicePtrs, 0, count);
+
+            foreach (var ptr in epDevicePtrs)
+            {
+                epDevices.Add(new OrtEpDevice(ptr));
+            }
+
+            return epDevices.AsReadOnly();
+        }        
 
         #endregion
 

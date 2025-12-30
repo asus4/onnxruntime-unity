@@ -14,7 +14,7 @@ sign_upm() {
     echo "Signing UPM package: $1"
     
     # Sync README.md
-    cp ./README.md $1/README.md
+    cp ./README.md "$1/README.md"
 
     # Export UPM package tarball
     local package_dir=$(realpath "$1")

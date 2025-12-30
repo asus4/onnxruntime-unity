@@ -53,7 +53,7 @@ gh release create "v$VERSION" \
     packages/*/*.tgz
 
 # Publish packages manually after checking the draft release
-# npm publish packages/com.github.asus4.onnxruntime*/*.tgz
+# npm publish packages/com.github.asus4.onnxruntime*/*.tgz --tag latest
 
 echo "Done."
 exit 0

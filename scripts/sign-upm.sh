@@ -52,5 +52,8 @@ gh release create "v$VERSION" \
     --generate-notes \
     packages/*/*.tgz
 
+# Publish packages manually after checking the draft release
+# npm publish packages/com.github.asus4.onnxruntime*/*.tgz
+
 echo "Done."
 exit 0

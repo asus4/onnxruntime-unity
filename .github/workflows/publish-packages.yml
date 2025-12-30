@@ -1,7 +1,8 @@
 name: Publish UPM packages
 on:
-  release:
-    types: [published]
+  # Disable action to support UPM Package signatures
+  # release:
+  #   types: [published]
   workflow_dispatch:
 permissions:
   id-token: write

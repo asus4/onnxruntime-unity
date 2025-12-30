@@ -5,3 +5,7 @@
 *.framework
 *.so
 *.xcframework
+
+# Ignore build files
+*.log
+# *.tgz

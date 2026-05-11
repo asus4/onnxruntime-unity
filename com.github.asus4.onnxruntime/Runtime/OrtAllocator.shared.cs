@@ -125,7 +125,8 @@ namespace Microsoft.ML.OnnxRuntime
         private static OrtMemoryInfo CreateCpuMemoryInfo()
         {
             // Returns OrtMemoryInfo instance that needs to be disposed
-            NativeApiStatus.VerifySuccess(NativeMethods.OrtCreateCpuMemoryInfo(OrtAllocatorType.DeviceAllocator, OrtMemType.Cpu, out IntPtr memoryInfo));
+            NativeApiStatus.VerifySuccess(NativeMethods.OrtCreateCpuMemoryInfo(OrtAllocatorType.DeviceAllocator,
+                OrtMemType.Cpu, out IntPtr memoryInfo));
             return new OrtMemoryInfo(memoryInfo, true);
         }
 
@@ -225,6 +226,26 @@ namespace Microsoft.ML.OnnxRuntime
         public OrtMemoryInfo(string allocatorName, OrtAllocatorType allocatorType, int deviceId, OrtMemType memoryType)
             : this(NativeOnnxValueHelper.StringToZeroTerminatedUtf8(allocatorName), allocatorType, deviceId, memoryType)
         {
+
+        }
+
+        /// <summary>
+        /// Creates an instance of OrtMemoryInfo using OrtCreateMemoryInfoV2
+        /// </summary>
+        /// <param name="allocatorName">In this overload this is an arbitrary name</param>
+        /// <param name="deviceType">Device Type</param>
+        /// <param name="vendorId">Vendor Id</param>
+        /// <param name="deviceId">Device Id</param>
+        /// <param name="deviceMemoryType">Device Memory Type</param>
+        /// <param name="alignment">Alignment is required or 0</param>
+        /// <param name="allocatorType">Allocator Type</param>
+        public OrtMemoryInfo(string allocatorName, OrtMemoryInfoDeviceType deviceType, uint vendorId,
+            int deviceId, OrtDeviceMemoryType deviceMemoryType, ulong alignment, OrtAllocatorType allocatorType)
+            : base(IntPtr.Zero, true)
+        {
+            NativeApiStatus.VerifySuccess(NativeMethods.OrtCreateMemoryInfoV2(
+                   NativeOnnxValueHelper.StringToZeroTerminatedUtf8(allocatorName),
+                   deviceType, vendorId, deviceId, deviceMemoryType, (UIntPtr)alignment, allocatorType, out handle));
         }
 
         /// <summary>

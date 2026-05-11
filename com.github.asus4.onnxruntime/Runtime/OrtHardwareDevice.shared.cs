@@ -100,10 +100,5 @@ namespace Microsoft.ML.OnnxRuntime
         }
 
         private readonly IntPtr _handle;
-
-        /// <summary>
-        /// Gets the native handle for internal use.
-        /// </summary>
-        internal IntPtr Handle => _handle;
     }
 }

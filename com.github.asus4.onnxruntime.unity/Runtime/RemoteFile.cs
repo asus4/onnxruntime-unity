@@ -81,10 +81,24 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             else
             {
                 Log($"Cache not found at {localPath}. Loading from: {url}");
-                using var handler = new DownloadHandlerFile(localPath);
-                handler.removeFileOnAbort = true;
-                using var request = new UnityWebRequest(url, "GET", handler, null);
-                await LoadWithProgress(request, this, cancellationToken);
+                string tempPath = $"{localPath}.{Guid.NewGuid():N}.tmp";
+
+                try
+                {
+                    using var handler = new DownloadHandlerFile(tempPath);
+                    handler.removeFileOnAbort = true;
+                    using var request = new UnityWebRequest(url, "GET", handler, null);
+                    await LoadWithProgress(request, this, cancellationToken);
+
+                    File.Delete(localPath);
+                    File.Move(tempPath, localPath);
+                }
+                catch
+                {
+                    File.Delete(tempPath);
+                    throw;
+                }
+
                 return await File.ReadAllBytesAsync(localPath, cancellationToken);
             }
         }

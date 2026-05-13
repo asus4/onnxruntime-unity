@@ -1,29 +1,20 @@
 #!/bin/bash
-
 set -euo pipefail
-
-# See path for Unity Editor
-# https://docs.unity3d.com/6000.3/Documentation/Manual/cus-export.html
-# Note: Update the Unity version as needed
-UNITY_PATH="/Applications/Unity/Hub/Editor/6000.3.2f1/Unity.app/Contents/MacOS/Unity"
 
 # Sign UPM package
 # Usage:
 # sign_upm <package_folder>
 sign_upm() {
     echo "Signing UPM package: $1"
-    
+
     # Sync README.md
     cp ./README.md "$1/README.md"
 
     # Export UPM package tarball
     local package_dir=$(realpath "$1")
     local tarball_dir="$(realpath .)/packages/$1"
-    local logfile="$tarball_dir/sign-upm.log"
-    $UNITY_PATH -batchmode \
-        -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
-        -upmPack "$package_dir" "$tarball_dir" \
-        -cloudOrganization "$UNITY_ORG_ID" -logfile "$logfile"
+
+    upm pack "$package_dir" --organization-id "$UPM_ORG_ID" --destination "$tarball_dir"
 }
 
 # Extract version from UPM package filename

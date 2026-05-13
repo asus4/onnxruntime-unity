@@ -48,7 +48,8 @@ EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntimeGenAI-$TAG/runtimes)
 
 # macOS
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/arm64/
-cp $EXTRACT_DIR/osx-x64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/x64/
+# x86_64 binary is no longer provided
+# cp $EXTRACT_DIR/osx-x64/native/libonnxruntime-genai.dylib $PLUGINS_DIR/macOS/x64/
 
 # Windows
 cp $EXTRACT_DIR/win-arm64/native/onnxruntime-genai.dll $PLUGINS_DIR/Windows/arm64/

@@ -778,8 +778,12 @@ namespace Microsoft.ML.OnnxRuntime
             OrtGetCompileApi = (DOrtGetCompileApi)Marshal.GetDelegateForFunctionPointer(
                 api_.GetCompileApi, typeof(DOrtGetCompileApi));
 
+#if !(__IOS__ && ORT_GENAI)
             // populate the CompileApi struct now that we have the delegate to get the compile API pointer.
             CompileApi = new CompileApi.NativeMethods(OrtGetCompileApi);
+#else
+            // iOS GenAI overrides ORT headers; skipping compile API population to avoid crashing on iOS.
+#endif
 
             OrtCreateKeyValuePairs = (DOrtCreateKeyValuePairs)Marshal.GetDelegateForFunctionPointer(
                 api_.CreateKeyValuePairs, typeof(DOrtCreateKeyValuePairs));

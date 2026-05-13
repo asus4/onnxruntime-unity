@@ -8,9 +8,9 @@ permissions:
   id-token: write
   contents: write
 env:
-  ORT_VERSION: 1.23.2
+  ORT_VERSION: 1.25.1
   ORT_EXTENSIONS_VERSION: 0.14.0
-  ORT_GENAI_VERSION: 0.11.4
+  ORT_GENAI_VERSION: 0.13.1
   # Dry-run on workflow_dispatch
   NPM_OPTS: ${{ github.event_name == 'workflow_dispatch' && '--dry-run --tag canary' || '--tag latest' }}  
 jobs:

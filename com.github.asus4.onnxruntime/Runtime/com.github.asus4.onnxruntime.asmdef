@@ -19,6 +19,11 @@
             "name": "com.github.asus4.onnxruntime-extensions",
             "expression": "0.1.4",
             "define": "ORT_EXTENSION"
+        },
+        {
+            "name": "com.github.asus4.onnxruntime-genai",
+            "expression": "0.4.0",
+            "define": "ORT_GENAI"
         }
     ],
     "noEngineReferences": true

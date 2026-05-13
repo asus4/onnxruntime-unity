@@ -58,7 +58,8 @@ unzip -o $EXTRACT_DIR/ios/native/onnxruntime.xcframework.zip -d $PLUGINS_DIR/iOS
 ls $PLUGINS_DIR/iOS~/onnxruntime.xcframework/
 
 # macOS
-cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
+# x86_64 binary is no longer provided as of ONNX Runtime 1.24.1
+# cp $EXTRACT_DIR/osx-x64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
 
 # Windows

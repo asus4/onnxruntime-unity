@@ -1,8 +1,4 @@
-﻿#if UNITY_6000_0_OR_NEWER
-// #define NET8_0_OR_GREATER
-#endif // UNITY_6000_0_OR_NEWER
-
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.ML.OnnxRuntime.Tensors;

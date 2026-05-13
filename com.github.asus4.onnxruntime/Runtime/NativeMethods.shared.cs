@@ -516,7 +516,7 @@ namespace Microsoft.ML.OnnxRuntime
 
         static NativeMethods()
         {
-#if !NETSTANDARD2_0 && !__ANDROID__ && !__IOS__ && !UNITY_6000_0_OR_NEWER
+#if (NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER) && !__ANDROID__ && !__IOS__
             if (!OrtEnv.DisableDllImportResolver)
             {
                 try
@@ -957,7 +957,7 @@ namespace Microsoft.ML.OnnxRuntime
 #endif
         }
 
-#if !NETSTANDARD2_0 && !__ANDROID__ && !__IOS__ && !UNITY_6000_0_OR_NEWER
+#if (NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER) && !__ANDROID__ && !__IOS__
         /// <summary>
         /// Custom DllImportResolver to handle platform-specific library loading.
         /// On Windows, it explicitly loads the library with a lowercase .dll extension to handle

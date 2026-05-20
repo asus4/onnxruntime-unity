@@ -23,7 +23,7 @@ Pre-built ONNX Runtime libraries for Unity.
 ## Tested environment
 
 - Unity: 6000.3.11f1
-- ONNX Runtime: [1.25.1](https://github.com/microsoft/onnxruntime/releases/tag/v1.25.1)
+- ONNX Runtime: [1.26.0](https://github.com/microsoft/onnxruntime/releases/tag/v1.26.0)
 - ONNX Runtime Extensions: [0.14.0](https://github.com/microsoft/onnxruntime-extensions/releases/tag/v0.14.0)
 - ONNX Runtime GenAI: [0.13.1](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.13.1)
 
@@ -71,9 +71,9 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     }
   ]
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.4.5",
-    "com.github.asus4.onnxruntime.unity": "0.4.5",
-    "com.github.asus4.onnxruntime-extensions": "0.4.5",
+    "com.github.asus4.onnxruntime": "0.4.6",
+    "com.github.asus4.onnxruntime.unity": "0.4.6",
+    "com.github.asus4.onnxruntime-extensions": "0.4.6",
     ... other dependencies
   }
 ```

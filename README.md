@@ -58,35 +58,38 @@ ONNX Runtime Extensions are a set of pre/post-processing.
 
 ## How to Install
 
-Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.github.asus4.onnxruntime). Add the following `scopedRegistries` and `dependencies` in `Packages/manifest.json`.
+See [`com.github.asus4.onnxruntime/README.md`](com.github.asus4.onnxruntime/README.md) for the full setup. In short:
 
-```json
-  "scopedRegistries": [
-    {
-      "name": "NPM",
-      "url": "https://registry.npmjs.com",
-      "scopes": [
-        "com.github.asus4"
-      ]
-    }
-  ]
-  "dependencies": {
-    "com.github.asus4.onnxruntime": "0.4.6",
-    "com.github.asus4.onnxruntime.unity": "0.4.6",
-    "com.github.asus4.onnxruntime-extensions": "0.4.6",
-    ... other dependencies
-  }
-```
+1. Add the asus4 scoped registry to `Packages/manifest.json`:
+
+    ```json
+      "scopedRegistries": [
+        {
+          "name": "NPM",
+          "url": "https://registry.npmjs.com",
+          "scopes": [
+            "com.github.asus4"
+          ]
+        }
+      ],
+      "dependencies": {
+        "com.github.asus4.onnxruntime": "0.5.0",
+        "com.github.asus4.onnxruntime.unity": "0.5.0"
+      }
+    ```
+
+2. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity) and let
+   `Tools > ONNX Runtime > Setup NuGet.config` place the recommended
+   `NuGet.config` at the project root.
+3. Install `Microsoft.ML.OnnxRuntime` (and `Microsoft.ML.OnnxRuntime.Gpu.Windows`
+   or `.Gpu.Linux` for desktop CUDA) via the NuGetForUnity UI.
 
 ### What is included in each package
 
-- `com.github.asus4.onnxruntime` : Core library
-  - CPU provider for all platforms
-  - GPU provider for iOS, Android, macOS and Windows(only DirectML)
+- `com.github.asus4.onnxruntime` : Managed C# bindings + NuGetForUnity integration
 - `com.github.asus4.onnxruntime.unity` : (Optional) Utilities for Unity
-- `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
-- `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux
 - `com.github.asus4.onnxruntime-extensions` : (Optional) ONNX Runtime Extensions
+- `com.github.asus4.onnxruntime-genai` : (Optional) ONNX Runtime GenAI bindings
 
 ## License
 

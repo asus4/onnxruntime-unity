@@ -58,34 +58,53 @@ ONNX Runtime Extensions are a set of pre/post-processing.
 
 ## How to Install
 
-Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.github.asus4.onnxruntime). Add the following `scopedRegistries` and `dependencies` in `Packages/manifest.json`.
+Starting with v0.5 this package ships only the managed C# bindings. Native
+libraries (`onnxruntime.dll` / `.dylib` / `.so` / `.aar` / `.xcframework`)
+are installed from the official `Microsoft.ML.OnnxRuntime` NuGet package
+through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity).
 
-```json
-  "scopedRegistries": [
-    {
-      "name": "NPM",
-      "url": "https://registry.npmjs.com",
-      "scopes": [
-        "com.github.asus4"
-      ]
-    }
-  ]
-  "dependencies": {
-    "com.github.asus4.onnxruntime": "0.4.6",
-    "com.github.asus4.onnxruntime.unity": "0.4.6",
-    "com.github.asus4.onnxruntime-extensions": "0.4.6",
-    ... other dependencies
-  }
-```
+1. Add the asus4 scoped registry to `Packages/manifest.json`:
+
+    ```json
+      "scopedRegistries": [
+        {
+          "name": "NPM",
+          "url": "https://registry.npmjs.com",
+          "scopes": [
+            "com.github.asus4"
+          ]
+        }
+      ],
+      "dependencies": {
+        "com.github.asus4.onnxruntime": "0.5.0",
+        "com.github.asus4.onnxruntime.unity": "0.5.0"
+      }
+    ```
+
+2. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity)
+   (OpenUPM scoped registry is recommended).
+3. When the editor finishes compiling, accept the dialog "Place the
+   recommended NuGet.config at the project root?". You can re-run it
+   from `Tools > ONNX Runtime > Setup NuGet.config`.
+4. Open `NuGet > Manage NuGet Packages` and install
+   `Microsoft.ML.OnnxRuntime` (CPU).
+5. For GPU support add one of:
+   - `Microsoft.ML.OnnxRuntime.Gpu.Windows`
+   - `Microsoft.ML.OnnxRuntime.Gpu.Linux`
+
+   The `ORT_GPU_PROVIDER_WIN` / `ORT_GPU_PROVIDER_LINUX` scripting defines
+   are toggled automatically by `NuGetDefineSync` based on the installed
+   NuGet packages.
+
+> Why the change? GPU NuGet packages exceed the NPM 250 MB limit, so the
+> previous `com.github.asus4.onnxruntime.win-x64-gpu` /
+> `.linux-x64-gpu` UPM packages have been retired. Existing users can
+> pin `0.4.6` to keep the old layout.
 
 ### What is included in each package
 
-- `com.github.asus4.onnxruntime` : Core library
-  - CPU provider for all platforms
-  - GPU provider for iOS, Android, macOS and Windows(only DirectML)
+- `com.github.asus4.onnxruntime` : Managed C# bindings + NuGetForUnity integration
 - `com.github.asus4.onnxruntime.unity` : (Optional) Utilities for Unity
-- `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
-- `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux
 - `com.github.asus4.onnxruntime-extensions` : (Optional) ONNX Runtime Extensions
 
 ## License

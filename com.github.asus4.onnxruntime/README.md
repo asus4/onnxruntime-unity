@@ -83,11 +83,15 @@ through [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity).
 
 2. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity)
    (OpenUPM scoped registry is recommended).
-3. When the editor finishes compiling, accept the dialog "Place the
-   recommended NuGet.config at the project root?". You can re-run it
-   from `Tools > ONNX Runtime > Setup NuGet.config`.
+3. Copy `Packages/com.github.asus4.onnxruntime/NuGet/NuGet.config` to
+   `Assets/NuGet.config`, or merge its `enabledPlugins` entry into your
+   existing NuGetForUnity config.
 4. Open `NuGet > Manage NuGet Packages` and install
    `Microsoft.ML.OnnxRuntime` (CPU).
+   `Microsoft.ML.OnnxRuntime.Managed` will still be listed in
+   `packages.config` as a transitive dependency, but the bundled
+   NuGetForUnity plugin skips extracting the official managed DLL. The
+   managed C# bindings are provided by this UPM package instead.
 5. For GPU support add one of:
    - `Microsoft.ML.OnnxRuntime.Gpu.Windows`
    - `Microsoft.ML.OnnxRuntime.Gpu.Linux`

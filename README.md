@@ -78,11 +78,15 @@ See [`com.github.asus4.onnxruntime/README.md`](com.github.asus4.onnxruntime/READ
       }
     ```
 
-2. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity) and let
-   `Tools > ONNX Runtime > Setup NuGet.config` place the recommended
-   `NuGet.config` at the project root.
+2. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity), then
+   copy `Packages/com.github.asus4.onnxruntime/NuGet/NuGet.config` to
+   `Assets/NuGet.config` or merge its `enabledPlugins` entry into your existing
+   NuGetForUnity config.
 3. Install `Microsoft.ML.OnnxRuntime` (and `Microsoft.ML.OnnxRuntime.Gpu.Windows`
    or `.Gpu.Linux` for desktop CUDA) via the NuGetForUnity UI.
+   `Microsoft.ML.OnnxRuntime.Managed` can remain in `packages.config`; the
+   ONNX Runtime Unity NuGetForUnity plugin prevents the official managed DLL
+   from being extracted.
 
 ### What is included in each package
 

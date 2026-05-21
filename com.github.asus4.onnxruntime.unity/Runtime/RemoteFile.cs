@@ -62,45 +62,117 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             OnDownloadProgress?.Invoke(value);
         }
 
-        public async Awaitable<byte[]> Load(CancellationToken cancellationToken)
+        /// <summary>
+        /// Ensures the file is cached locally and returns its local path.
+        /// Downloads via DownloadHandlerFile (streamed to disk) when no cache exists.
+        /// On iOS, marks the file as excluded from iCloud backup.
+        /// </summary>
+        public async Awaitable<string> EnsureLocal(CancellationToken cancellationToken)
         {
             string localPath = LocalPath;
 
             if (HasCache)
             {
-                Log($"Cache Loading file from local: {localPath}");
-                using var handler = new DownloadHandlerBuffer();
-                if (!localPath.StartsWith("file:/"))
-                {
-                    localPath = $"file://{localPath}";
-                }
-                using var request = new UnityWebRequest(localPath, "GET", handler, null);
-                await LoadWithProgress(request, this, cancellationToken);
-                return handler.data;
+                Log($"Cache hit: {localPath}");
+                ExcludeFromBackup(localPath);
+                return localPath;
             }
-            else
+
+            Log($"Cache miss for {localPath}, downloading from: {url}");
+            string tempPath = $"{localPath}.{Guid.NewGuid():N}.tmp";
+
+            try
             {
-                Log($"Cache not found at {localPath}. Loading from: {url}");
-                string tempPath = $"{localPath}.{Guid.NewGuid():N}.tmp";
+                using var handler = new DownloadHandlerFile(tempPath);
+                handler.removeFileOnAbort = true;
+                using var request = new UnityWebRequest(url, "GET", handler, null);
+                await LoadWithProgress(request, this, cancellationToken);
 
-                try
-                {
-                    using var handler = new DownloadHandlerFile(tempPath);
-                    handler.removeFileOnAbort = true;
-                    using var request = new UnityWebRequest(url, "GET", handler, null);
-                    await LoadWithProgress(request, this, cancellationToken);
-
-                    File.Delete(localPath);
-                    File.Move(tempPath, localPath);
-                }
-                catch
-                {
-                    File.Delete(tempPath);
-                    throw;
-                }
-
-                return await File.ReadAllBytesAsync(localPath, cancellationToken);
+                File.Delete(localPath);
+                File.Move(tempPath, localPath);
             }
+            catch
+            {
+                File.Delete(tempPath);
+                throw;
+            }
+
+            ExcludeFromBackup(localPath);
+            return localPath;
+        }
+
+        /// <summary>
+        /// Returns the file size in bytes.
+        /// </summary>
+        public async Awaitable<long> GetSize(CancellationToken cancellationToken)
+        {
+            if (HasCache)
+            {
+                return new FileInfo(LocalPath).Length;
+            }
+
+            // For remote files, sends a single-byte Range GET and reads the Content-Range header
+            // More reliable than HEAD across Unity.
+            using var handler = new DownloadHandlerBuffer();
+            using var request = new UnityWebRequest(url, "GET", handler, null);
+            request.SetRequestHeader("Range", "bytes=0-0");
+
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Awaitable.NextFrameAsync();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    request.Abort();
+                    throw new TaskCanceledException();
+                }
+            }
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception($"Size probe failed for {url}: {request.error}");
+            }
+
+            // 206 Partial Content → Content-Range: bytes 0-0/<total>
+            string contentRange = request.GetResponseHeader("Content-Range");
+            if (!string.IsNullOrEmpty(contentRange))
+            {
+                int slashIdx = contentRange.LastIndexOf('/');
+                if (slashIdx >= 0 && slashIdx < contentRange.Length - 1
+                    && long.TryParse(contentRange[(slashIdx + 1)..], out long total))
+                {
+                    return total;
+                }
+            }
+
+            // 200 OK fallback (server ignored Range): Content-Length is the whole file.
+            string contentLength = request.GetResponseHeader("Content-Length");
+            if (!string.IsNullOrEmpty(contentLength) && long.TryParse(contentLength, out long length))
+            {
+                return length;
+            }
+
+            throw new Exception($"Could not determine file size for {url} (no Content-Range or Content-Length)");
+        }
+
+        /// <summary>
+        /// Downloads (if needed) and returns the full file bytes.
+        /// Convenience wrapper around <see cref="EnsureLocal"/> for callers that want
+        /// a managed byte[]. For large models prefer <see cref="EnsureLocal"/> and pass
+        /// the returned path to <c>InferenceSession</c> directly so ORT can mmap the file.
+        /// </summary>
+        public async Awaitable<byte[]> Load(CancellationToken cancellationToken)
+        {
+            var path = await EnsureLocal(cancellationToken);
+            return await File.ReadAllBytesAsync(path, cancellationToken);
+        }
+
+        // Excludes the file from iCloud backup on iOS.
+        static void ExcludeFromBackup(string path)
+        {
+#if UNITY_IOS && !UNITY_EDITOR
+            UnityEngine.iOS.Device.SetNoBackupFlag(path);
+#endif
         }
 
         static async Awaitable LoadWithProgress(UnityWebRequest request, IProgress<float> progress, CancellationToken cancellationToken)

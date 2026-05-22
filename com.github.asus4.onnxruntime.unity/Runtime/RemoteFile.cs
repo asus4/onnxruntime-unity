@@ -63,15 +63,14 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         }
 
         /// <summary>
-        /// Ensures the file is cached locally and returns its local path.
-        /// Downloads via DownloadHandlerFile (streamed to disk) when no cache exists.
-        /// On iOS, marks the file as excluded from iCloud backup.
+        /// Ensures the file is downloaded and cached locally, returning its local path.
+        /// On iOS, the file is excluded from iCloud backup.
         /// </summary>
         public async Awaitable<string> EnsureLocal(CancellationToken cancellationToken)
         {
             string localPath = LocalPath;
 
-            if (HasCache)
+            if (File.Exists(localPath))
             {
                 Log($"Cache hit: {localPath}");
                 ExcludeFromBackup(localPath);
@@ -86,7 +85,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 using var handler = new DownloadHandlerFile(tempPath);
                 handler.removeFileOnAbort = true;
                 using var request = new UnityWebRequest(url, "GET", handler, null);
-                await LoadWithProgress(request, this, cancellationToken);
+                await SendAsync(request, this, cancellationToken);
 
                 File.Delete(localPath);
                 File.Move(tempPath, localPath);
@@ -106,34 +105,18 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// </summary>
         public async Awaitable<long> GetSize(CancellationToken cancellationToken)
         {
-            if (HasCache)
+            string localPath = LocalPath;
+            if (File.Exists(localPath))
             {
-                return new FileInfo(LocalPath).Length;
+                return new FileInfo(localPath).Length;
             }
 
-            // For remote files, sends a single-byte Range GET and reads the Content-Range header
-            // More reliable than HEAD across Unity.
+            // Range GET is more reliable than HEAD with UnityWebRequest.
             using var handler = new DownloadHandlerBuffer();
             using var request = new UnityWebRequest(url, "GET", handler, null);
             request.SetRequestHeader("Range", "bytes=0-0");
+            await SendAsync(request, null, cancellationToken);
 
-            var operation = request.SendWebRequest();
-            while (!operation.isDone)
-            {
-                await Awaitable.NextFrameAsync();
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    request.Abort();
-                    throw new TaskCanceledException();
-                }
-            }
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                throw new Exception($"Size probe failed for {url}: {request.error}");
-            }
-
-            // 206 Partial Content → Content-Range: bytes 0-0/<total>
             string contentRange = request.GetResponseHeader("Content-Range");
             if (!string.IsNullOrEmpty(contentRange))
             {
@@ -145,7 +128,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 }
             }
 
-            // 200 OK fallback (server ignored Range): Content-Length is the whole file.
             string contentLength = request.GetResponseHeader("Content-Length");
             if (!string.IsNullOrEmpty(contentLength) && long.TryParse(contentLength, out long length))
             {
@@ -167,7 +149,6 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             return await File.ReadAllBytesAsync(path, cancellationToken);
         }
 
-        // Excludes the file from iCloud backup on iOS.
         static void ExcludeFromBackup(string path)
         {
 #if UNITY_IOS && !UNITY_EDITOR
@@ -175,9 +156,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 #endif
         }
 
-        static async Awaitable LoadWithProgress(UnityWebRequest request, IProgress<float> progress, CancellationToken cancellationToken)
+        static async Awaitable SendAsync(UnityWebRequest request, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            progress.Report(0.0f);
+            progress?.Report(0.0f);
             var operation = request.SendWebRequest();
             while (!operation.isDone)
             {
@@ -187,10 +168,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                     request.Abort();
                     throw new TaskCanceledException();
                 }
-                progress.Report(operation.progress);
+                progress?.Report(operation.progress);
             }
 
-            progress.Report(1.0f);
+            progress?.Report(1.0f);
 
             if (request.result != UnityWebRequest.Result.Success)
             {

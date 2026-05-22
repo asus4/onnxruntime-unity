@@ -20,6 +20,10 @@ Pre-built ONNX Runtime libraries for Unity.
 
 <https://github.com/user-attachments/assets/93c3dccd-569c-4a93-826b-0c9b5b60ebe9>
 
+**Supertonic TTS**  
+
+<https://github.com/user-attachments/assets/0f8d6465-2835-475c-b90d-c08f5befd5dd>
+
 ## Tested environment
 
 - Unity: 6000.3.11f1

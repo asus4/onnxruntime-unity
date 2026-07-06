@@ -37,6 +37,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
 
         private readonly ComputeShader compute;
         private readonly int kernel;
+        private readonly int[] outputSize;
         private readonly RenderTexture texture;
         private readonly GraphicsBuffer tensor;
         private readonly CommandBuffer commands;
@@ -85,11 +86,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                 ? customCompute
                 : DefaultCompute.Value;
             kernel = compute.FindKernel("TextureToTensor");
-
-            // Set constant values in ComputeShader
-            compute.SetInts(_OutputSize, width, height);
-            compute.SetBuffer(kernel, _OutputTensor, tensor);
-            compute.SetTexture(kernel, _OutputTex, texture, 0);
+            outputSize = new int[] { width, height };
 
             commands = new CommandBuffer();
         }
@@ -179,6 +176,9 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         {
             TransformMatrix = t;
 
+            commands.SetComputeIntParams(compute, _OutputSize, outputSize);
+            commands.SetComputeBufferParam(compute, kernel, _OutputTensor, tensor);
+            commands.SetComputeTextureParam(compute, kernel, _OutputTex, texture, 0);
             commands.SetComputeTextureParam(compute, kernel, _InputTex, input, 0);
             commands.SetComputeMatrixParam(compute, _TransformMatrix, t);
             commands.SetComputeFloatParams(compute, _Mean, Mean.x, Mean.y, Mean.z);

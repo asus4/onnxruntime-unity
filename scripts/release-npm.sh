@@ -4,7 +4,7 @@
 npm publish packages/com.github.asus4.onnxruntime/*.tgz --tag latest
 npm publish packages/com.github.asus4.onnxruntime.unity/*.tgz --tag latest
 npm publish packages/com.github.asus4.onnxruntime-extensions/*.tgz --tag latest
-npm publish packages/com.github.asus4.onnxruntime-genai/*.tgz --tag latests
+npm publish packages/com.github.asus4.onnxruntime-genai/*.tgz --tag latest
 
 # Disabled due to file size limit in npm
 # npm publish packages/com.github.asus4.onnxruntime.linux-x64-gpu/*.tgz --tag latest

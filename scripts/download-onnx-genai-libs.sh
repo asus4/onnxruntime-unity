@@ -61,6 +61,15 @@ cp $EXTRACT_DIR/linux-x64/native/libonnxruntime-genai.so $PLUGINS_DIR/Linux/x64/
 
 # Android
 cp $EXTRACT_DIR/android/native/onnxruntime-genai.aar $PLUGINS_DIR/Android/
+# TODO: Remove this workaround once a GenAI release newer than 0.15.2 ships.
+# GenAI 0.15.x classes.jar contains META-INF/LICENSE-1DS, which also exists in onnxruntime.aar (ORT >= 1.29.0),
+# so Gradle mergeJavaResource fails on the duplicate. Fixed upstream (renamed to LICENSE-1DS-ORTGENAI) in:
+# https://github.com/microsoft/onnxruntime-genai/pull/2402
+AAR_WORK_DIR=$TMP_DIR/onnxruntime-genai-aar
+rm -rf $AAR_WORK_DIR && mkdir -p $AAR_WORK_DIR
+unzip -q $PLUGINS_DIR/Android/onnxruntime-genai.aar classes.jar -d $AAR_WORK_DIR
+zip -q -d $AAR_WORK_DIR/classes.jar 'META-INF/LICENSE-1DS' || true
+(cd $AAR_WORK_DIR && zip -q $PLUGINS_DIR/Android/onnxruntime-genai.aar classes.jar)
 
 # iOS xcframework
 rm -rf $PLUGINS_DIR/iOS~/onnxruntime-genai.xcframework

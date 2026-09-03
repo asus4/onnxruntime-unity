@@ -20,6 +20,13 @@ namespace Microsoft.ML.OnnxRuntimeGenAI
 {
     internal static class NativeMethods
     {
+        static NativeMethods()
+        {
+            // Modified for Unity: disable telemetry.
+            // https://github.com/microsoft/onnxruntime-genai/blob/main/docs/Privacy.md
+            Environment.SetEnvironmentVariable("ORT_DISABLE_TELEMETRY", "1");  
+        }
+
         internal class NativeLib
         {
 #if __ANDROID__

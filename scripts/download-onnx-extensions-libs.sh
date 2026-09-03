@@ -69,5 +69,8 @@ rm -rf $PLUGINS_DIR/iOS~/Headers
 rm $PLUGINS_DIR/iOS~/LICENSE
 ls $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
 
+# Third-party notices
+cp $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/ThirdPartyNotices.txt $PLUGINS_DIR/../ThirdPartyNotices.txt
+
 echo "Done."
 exit 0

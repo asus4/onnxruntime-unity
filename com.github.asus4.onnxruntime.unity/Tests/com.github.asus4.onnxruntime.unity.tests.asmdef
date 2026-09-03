@@ -3,7 +3,8 @@
     "rootNamespace": "Microsoft.ML.OnnxRuntime.Unity.Tests",
     "references": [
         "GUID:effe5775fa53c49a39f54ea0433a395b",
-        "GUID:d8b63aba1907145bea998dd612889d6b"
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:8600c83db57f44fe2aa05f4cf22420bf"
     ],
     "includePlatforms": [
         "Editor"

@@ -35,6 +35,26 @@ function download_nuget() {
     unzip -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg -d $TMP_DIR/$EXTRACT_DIR
 }
 
+
+# Remove the 1DS telemetry ContentProvider and network permissions from an AAR manifest.
+# Telemetry is disabled by this package (ORT_DISABLE_TELEMETRY), so the provider is never used.
+# NOTE: As a result, opting in to telemetry on Android is not supported.
+function strip_telemetry_manifest() {
+    AAR_PATH=$1
+    WORK_DIR=$TMP_DIR/aar-manifest
+    rm -rf $WORK_DIR && mkdir -p $WORK_DIR
+    unzip -q $AAR_PATH AndroidManifest.xml -d $WORK_DIR
+    python3 - "$WORK_DIR/AndroidManifest.xml" <<'PY'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+s = re.sub(r'\s*<uses-permission android:name="android.permission.(INTERNET|ACCESS_NETWORK_STATE)" />', '', s)
+s = re.sub(r'\s*<provider\b[^>]*?/>', '', s, flags=re.S)
+open(p, 'w').write(s)
+PY
+    (cd $WORK_DIR && zip -q $AAR_PATH AndroidManifest.xml)
+}
+
 #--------------------------------------
 # ONNX Runtime
 #--------------------------------------
@@ -50,6 +70,7 @@ EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/runtimes)
 
 # Android
 cp $EXTRACT_DIR/android/native/onnxruntime.aar $PLUGINS_DIR/Android/
+strip_telemetry_manifest $PLUGINS_DIR/Android/onnxruntime.aar
 
 # iOS XCFramework
 rm -rf $PLUGINS_DIR/iOS~/onnxruntime.xcframework
@@ -70,6 +91,9 @@ cp $EXTRACT_DIR/win-x64/native/*.dll $PLUGINS_DIR/Windows/x64/
 # arm64 is not supported by Unity
 # cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime.so $PLUGINS_DIR/Linux/arm64/
 cp $EXTRACT_DIR/linux-x64/native/*.so $PLUGINS_DIR/Linux/x64/
+
+# Third-party notices
+cp $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/ThirdPartyNotices.txt $PROJECT_DIR/com.github.asus4.onnxruntime/ThirdPartyNotices.txt
 
 # Microsoft.ML.OnnxRuntime.Gpu.Windows 
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)

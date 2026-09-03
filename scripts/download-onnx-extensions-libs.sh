@@ -46,7 +46,8 @@ download_nuget Microsoft.ML.OnnxRuntime.Extensions $TAG
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/runtimes)
 
 # macOS
-cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
+# x86_64 macOS binary was removed in 0.4.7
+# cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx.10.14-arm64/native/libortextensions.dylib $PLUGINS_DIR/macOS/arm64/
 
 # Windows

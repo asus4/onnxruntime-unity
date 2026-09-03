@@ -46,7 +46,8 @@ download_nuget Microsoft.ML.OnnxRuntime.Extensions $TAG
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/runtimes)
 
 # macOS
-cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
+# x86_64 macOS binary was removed in 0.4.7
+# cp $EXTRACT_DIR/osx.10.14-x64/native/libortextensions.dylib $PLUGINS_DIR/macOS/x64/
 cp $EXTRACT_DIR/osx.10.14-arm64/native/libortextensions.dylib $PLUGINS_DIR/macOS/arm64/
 
 # Windows
@@ -67,6 +68,9 @@ unzip -o $EXTRACT_DIR/ios/native/onnxruntime_extensions.xcframework.zip -d $PLUG
 rm -rf $PLUGINS_DIR/iOS~/Headers
 rm $PLUGINS_DIR/iOS~/LICENSE
 ls $PLUGINS_DIR/iOS~/onnxruntime_extensions.xcframework/
+
+# Third-party notices
+cp $TMP_DIR/Microsoft.ML.OnnxRuntime.Extensions-$TAG/ThirdPartyNotices.txt $PLUGINS_DIR/../ThirdPartyNotices.txt
 
 echo "Done."
 exit 0

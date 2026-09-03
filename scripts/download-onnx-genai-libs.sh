@@ -35,6 +35,26 @@ function download_nuget() {
     unzip -o $TMP_DIR/$PACKAGE_NAME-$VERSION.nupkg -d $TMP_DIR/$EXTRACT_DIR
 }
 
+
+# Remove the 1DS telemetry ContentProvider and network permissions from an AAR manifest.
+# Telemetry is disabled by this package (ORT_DISABLE_TELEMETRY), so the provider is never used.
+# NOTE: As a result, opting in to telemetry on Android is not supported.
+function strip_telemetry_manifest() {
+    AAR_PATH=$1
+    WORK_DIR=$TMP_DIR/aar-manifest
+    rm -rf $WORK_DIR && mkdir -p $WORK_DIR
+    unzip -q $AAR_PATH AndroidManifest.xml -d $WORK_DIR
+    python3 - "$WORK_DIR/AndroidManifest.xml" <<'PY'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+s = re.sub(r'\s*<uses-permission android:name="android.permission.(INTERNET|ACCESS_NETWORK_STATE)" />', '', s)
+s = re.sub(r'\s*<provider\b[^>]*?/>', '', s, flags=re.S)
+open(p, 'w').write(s)
+PY
+    (cd $WORK_DIR && zip -q $AAR_PATH AndroidManifest.xml)
+}
+
 #--------------------------------------
 # ONNX Runtime
 #--------------------------------------
@@ -61,6 +81,24 @@ cp $EXTRACT_DIR/linux-x64/native/libonnxruntime-genai.so $PLUGINS_DIR/Linux/x64/
 
 # Android
 cp $EXTRACT_DIR/android/native/onnxruntime-genai.aar $PLUGINS_DIR/Android/
+strip_telemetry_manifest $PLUGINS_DIR/Android/onnxruntime-genai.aar
+# TODO: Remove this workaround once a GenAI release newer than 0.15.2 ships.
+# GenAI 0.15.x classes.jar contains META-INF/LICENSE-1DS, which also exists in onnxruntime.aar (ORT >= 1.29.0),
+# so Gradle mergeJavaResource fails on the duplicate. Rename it as the upstream fix does:
+# https://github.com/microsoft/onnxruntime-genai/pull/2402
+AAR_WORK_DIR=$TMP_DIR/onnxruntime-genai-aar
+rm -rf $AAR_WORK_DIR && mkdir -p $AAR_WORK_DIR
+unzip -q $PLUGINS_DIR/Android/onnxruntime-genai.aar classes.jar -d $AAR_WORK_DIR
+if unzip -l $AAR_WORK_DIR/classes.jar | grep -q 'META-INF/LICENSE-1DS$'; then
+    unzip -q $AAR_WORK_DIR/classes.jar META-INF/LICENSE-1DS -d $AAR_WORK_DIR
+    mv $AAR_WORK_DIR/META-INF/LICENSE-1DS $AAR_WORK_DIR/META-INF/LICENSE-1DS-ORTGENAI
+    zip -q -d $AAR_WORK_DIR/classes.jar 'META-INF/LICENSE-1DS'
+    (cd $AAR_WORK_DIR && zip -q classes.jar META-INF/LICENSE-1DS-ORTGENAI)
+fi
+(cd $AAR_WORK_DIR && zip -q $PLUGINS_DIR/Android/onnxruntime-genai.aar classes.jar)
+
+# Third-party notices
+cp $TMP_DIR/Microsoft.ML.OnnxRuntimeGenAI-$TAG/ThirdPartyNotices.txt $PLUGINS_DIR/../ThirdPartyNotices.txt
 
 # iOS xcframework
 rm -rf $PLUGINS_DIR/iOS~/onnxruntime-genai.xcframework

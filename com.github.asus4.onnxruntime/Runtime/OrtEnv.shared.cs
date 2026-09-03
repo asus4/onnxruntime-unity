@@ -144,6 +144,13 @@ namespace Microsoft.ML.OnnxRuntime
         // Lazy instantiation. _createOptions must be set before the first creation of the instance.
         private static Lazy<OrtEnv> _instance = new Lazy<OrtEnv>(CreateInstance);
 
+        static OrtEnv()
+        {
+            // Modified for Unity: disable telemetry.
+            // https://github.com/microsoft/onnxruntime/blob/main/docs/Privacy.md
+            Environment.SetEnvironmentVariable("ORT_DISABLE_TELEMETRY", "1");
+        }
+
         // Internal logging function that will be called from native code
         private delegate void DOrtLoggingFunctionInternal(IntPtr param,
                 IntPtr severity,

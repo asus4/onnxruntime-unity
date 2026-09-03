@@ -65,6 +65,13 @@ namespace Microsoft.ML.OnnxRuntime.Editor
             string targetBuildPhaseGuid = pbxProject.AddFrameworksBuildPhase(unityTargetGuid);
             pbxProject.AddFileToBuildSection(unityTargetGuid, targetBuildPhaseGuid, frameworkGuid);
 
+            // ONNX Runtime >= 1.29.0 references Network.framework
+            const string NETWORK_FRAMEWORK = "Network.framework";
+            if (!pbxProject.ContainsFramework(unityTargetGuid, NETWORK_FRAMEWORK))
+            {
+                pbxProject.AddFrameworkToProject(unityTargetGuid, NETWORK_FRAMEWORK, false);
+            }
+
 #if ORT_GENAI_ENABLED
             // NOTE: Required only when GenAI package is installed
             // GenAI loads the dynamic library in runtime. need to embed in the main target

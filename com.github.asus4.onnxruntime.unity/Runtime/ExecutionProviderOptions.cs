@@ -18,6 +18,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         /// XNNPACK EP
         /// </summary>
         XNNPACK = 2,
+        /// <summary>
+        /// WebGPU EP (Windows)
+        /// </summary>
+        WebGPU = 3,
     }
 
     [Serializable]
@@ -31,24 +35,26 @@ namespace Microsoft.ML.OnnxRuntime.Unity
         };
 
         /// <summary>
-        /// Create a session options with Execution Provider
+        /// Append the first execution provider that can be initialized in the priority order, or fall back to CPU
         /// </summary>
         /// <param name="options">A session options</param>
-        /// <returns>Created session options, which must be disposed</returns>
         public void AppendExecutionProviders(SessionOptions options)
         {
-
             foreach (var provider in executionProviderPriorities)
             {
                 try
                 {
                     AddExecutionProvider(options, provider);
-                    break;
+                    return;
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to initialize GPU Execution Provider: {e.Message}");
+                    Debug.LogWarning($"Failed to initialize {provider} execution provider: {e.Message}");
                 }
+            }
+            if (executionProviderPriorities.Length > 0)
+            {
+                Debug.Log("No execution provider was initialized. Using the default CPU provider.");
             }
         }
 
@@ -102,29 +108,31 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                         // It throws an exception if GPU is not available.
                         NnapiFlags.NNAPI_FLAG_USE_FP16 | NnapiFlags.NNAPI_FLAG_CPU_DISABLED);
                     break;
+                case RuntimePlatform.WindowsEditor:
+                case RuntimePlatform.WindowsPlayer:
+                case RuntimePlatform.WindowsServer:
 #if ORT_GPU_PROVIDER_WIN
-                case RuntimePlatform.WindowsEditor:
-                case RuntimePlatform.WindowsPlayer:
-                case RuntimePlatform.WindowsServer:
-                    Debug.Log("TensorRT is enabled");
-                    options.AppendExecutionProvider_Tensorrt();
-                    options.AppendExecutionProvider_CUDA();
-                    break;
-#else
-                case RuntimePlatform.WindowsEditor:
-                case RuntimePlatform.WindowsPlayer:
-                case RuntimePlatform.WindowsServer:
-                    Debug.Log("DirectML is enabled");
-                    options.AppendExecutionProvider_DML(0);
-                    break;
+                    // Player builds only: the providers must be next to onnxruntime.dll
+                    if (TryAppendCudaProviders(options))
+                    {
+                        break;
+                    }
 #endif
+                    Debug.Log("WebGPU is enabled");
+                    WebGpuExecutionProvider.Append(options);
+                    break;
                 case RuntimePlatform.LinuxEditor:
                 case RuntimePlatform.LinuxPlayer:
                 case RuntimePlatform.LinuxServer:
-                    Debug.Log("TensorRT is enabled");
-                    options.AppendExecutionProvider_Tensorrt();
-                    options.AppendExecutionProvider_CUDA();
-                    break;
+#if ORT_GPU_PROVIDER_LINUX
+                    if (TryAppendCudaProviders(options))
+                    {
+                        break;
+                    }
+                    throw new NotSupportedException("TensorRT / CUDA execution providers could not be initialized");
+#else
+                    throw new NotSupportedException("GPU execution provider is not bundled for Linux. Install com.github.asus4.onnxruntime.linux-x64-gpu");
+#endif
                 // TODO: Add WebGL build
                 default:
                     Debug.LogWarning($"Execution provider is not supported on {platform}");
@@ -132,9 +140,39 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
         }
 
+#if ORT_GPU_PROVIDER_WIN || ORT_GPU_PROVIDER_LINUX
+        /// <summary>
+        /// Append TensorRT and CUDA providers. Requires CUDA, cuDNN and TensorRT installed on the machine
+        /// </summary>
+        private static bool TryAppendCudaProviders(SessionOptions options)
+        {
+            bool appended = false;
+            try
+            {
+                options.AppendExecutionProvider_Tensorrt();
+                Debug.Log("TensorRT is enabled");
+                appended = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"TensorRT is not available: {e.Message}");
+            }
+            try
+            {
+                options.AppendExecutionProvider_CUDA();
+                Debug.Log("CUDA is enabled");
+                appended = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"CUDA is not available: {e.Message}");
+            }
+            return appended;
+        }
+#endif
+
         private void AddExecutionProvider(SessionOptions options, ExecutionProviderPriority priority)
         {
-
             switch (priority)
             {
                 case ExecutionProviderPriority.None:
@@ -144,6 +182,10 @@ namespace Microsoft.ML.OnnxRuntime.Unity
                     break;
                 case ExecutionProviderPriority.XNNPACK:
                     AppendXNNPackProvider(options);
+                    break;
+                case ExecutionProviderPriority.WebGPU:
+                    Debug.Log("WebGPU is enabled");
+                    WebGpuExecutionProvider.Append(options);
                     break;
             }
         }

@@ -38,7 +38,8 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             _ => false,
         };
 
-        static bool isRegistered = false;
+        // Disposing OrtEnv re-creates the singleton without the plugin, so track the instance
+        static OrtEnv registeredEnv;
 
         /// <summary>
         /// Append the WebGPU execution provider. The plugin library is registered to the OrtEnv on first use.
@@ -66,15 +67,21 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             }
 
             var devices = FindDevices(env);
-            if (devices.Count > 0)
+            if (devices.Count == 0 && !ReferenceEquals(registeredEnv, env))
             {
-                return devices;
+                Register(env);
+                devices = FindDevices(env);
+                Debug.Log($"WebGPU devices: {string.Join(", ", devices.Select(Describe))}");
             }
-            if (isRegistered)
+            if (devices.Count == 0)
             {
                 throw new NotSupportedException("No WebGPU device is available. A Direct3D 12 capable GPU is required.");
             }
+            return devices;
+        }
 
+        static void Register(OrtEnv env)
+        {
             string path = ResolveLibraryPath();
             Debug.Log($"Registering WebGPU execution provider: {path}");
             try
@@ -85,15 +92,7 @@ namespace Microsoft.ML.OnnxRuntime.Unity
             {
                 // Already registered by a previous domain (Editor domain reload)
             }
-            isRegistered = true;
-
-            devices = FindDevices(env);
-            if (devices.Count == 0)
-            {
-                throw new NotSupportedException("No WebGPU device is available. A Direct3D 12 capable GPU is required.");
-            }
-            Debug.Log($"WebGPU devices: {string.Join(", ", devices.Select(Describe))}");
-            return devices;
+            registeredEnv = env;
         }
 
         /// <summary>

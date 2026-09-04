@@ -10,6 +10,12 @@ fi
 
 # Define Variables
 TAG=$1
+# WebGPU plugin EP is versioned separately: https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime.EP.WebGpu
+WEBGPU_EP_TAG=${2:-0.3.0}
+if [[ ! $WEBGPU_EP_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "WebGPU EP tag $WEBGPU_EP_TAG is not in the correct format. It should be like `$0 1.2.3 0.3.0`"
+    exit 1
+fi
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 PLUGINS_DIR="$PROJECT_DIR/com.github.asus4.onnxruntime/Plugins"
 TMP_DIR="$PROJECT_DIR/.tmp"
@@ -65,6 +71,7 @@ PY
 download_nuget Microsoft.ML.OnnxRuntime $TAG
 download_nuget Microsoft.ML.OnnxRuntime.Gpu.Linux $TAG
 download_nuget Microsoft.ML.OnnxRuntime.Gpu.Windows $TAG
+download_nuget Microsoft.ML.OnnxRuntime.EP.WebGpu $WEBGPU_EP_TAG
 
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/runtimes)
 
@@ -84,24 +91,42 @@ ls $PLUGINS_DIR/iOS~/onnxruntime.xcframework/
 cp $EXTRACT_DIR/osx-arm64/native/libonnxruntime.dylib $PLUGINS_DIR/macOS/arm64/
 
 # Windows
+# x64 uses the GPU package build: it includes the CPU provider and exports the CUDA / TensorRT entry points
 cp $EXTRACT_DIR/win-arm64/native/*.dll $PLUGINS_DIR/Windows/arm64/
-cp $EXTRACT_DIR/win-x64/native/*.dll $PLUGINS_DIR/Windows/x64/
+GPU_EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)
+cp $GPU_EXTRACT_DIR/win-x64/native/onnxruntime.dll $PLUGINS_DIR/Windows/x64/
+cp $GPU_EXTRACT_DIR/win-x64/native/onnxruntime_providers_shared.dll $PLUGINS_DIR/Windows/x64/
+
+# Windows: WebGPU plugin EP (DirectML is no longer published by Microsoft)
+WEBGPU_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.EP.WebGpu-$WEBGPU_EP_TAG)
+cp $WEBGPU_DIR/runtimes/win-arm64/native/*.dll $PLUGINS_DIR/Windows/arm64/
+cp $WEBGPU_DIR/runtimes/win-x64/native/*.dll $PLUGINS_DIR/Windows/x64/
+cp $WEBGPU_DIR/ThirdPartyNotices.txt $PROJECT_DIR/com.github.asus4.onnxruntime/ThirdPartyNotices-WebGpuEP.txt
 
 # Linux
 # arm64 is not supported by Unity
 # cp $EXTRACT_DIR/linux-arm64/native/libonnxruntime.so $PLUGINS_DIR/Linux/arm64/
-cp $EXTRACT_DIR/linux-x64/native/*.so $PLUGINS_DIR/Linux/x64/
+# x64 uses the GPU package build (same reason as Windows)
+GPU_EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Linux-$TAG/runtimes)
+cp $GPU_EXTRACT_DIR/linux-x64/native/libonnxruntime.so $PLUGINS_DIR/Linux/x64/
+cp $GPU_EXTRACT_DIR/linux-x64/native/libonnxruntime_providers_shared.so $PLUGINS_DIR/Linux/x64/
 
 # Third-party notices
 cp $TMP_DIR/Microsoft.ML.OnnxRuntime-$TAG/ThirdPartyNotices.txt $PROJECT_DIR/com.github.asus4.onnxruntime/ThirdPartyNotices.txt
 
-# Microsoft.ML.OnnxRuntime.Gpu.Windows 
+# Microsoft.ML.OnnxRuntime.Gpu.Windows: CUDA / TensorRT providers only (providers_shared is in the core package)
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Windows-$TAG/runtimes)
-cp $EXTRACT_DIR/win-x64/native/onnxruntime_*.dll $PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64/
+GPU_WIN_DIR=$PROJECT_DIR/com.github.asus4.onnxruntime.win-x64-gpu/Plugins/Windows/x64
+rm -f $GPU_WIN_DIR/onnxruntime_providers_shared.dll
+cp $EXTRACT_DIR/win-x64/native/onnxruntime_providers_cuda.dll $GPU_WIN_DIR/
+cp $EXTRACT_DIR/win-x64/native/onnxruntime_providers_tensorrt.dll $GPU_WIN_DIR/
 
 # Microsoft.ML.OnnxRuntime.Gpu.Linux
 EXTRACT_DIR=$(echo $TMP_DIR/Microsoft.ML.OnnxRuntime.Gpu.Linux-$TAG/runtimes)
-cp $EXTRACT_DIR/linux-x64/native/libonnxruntime_*.so $PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64/
+GPU_LINUX_DIR=$PROJECT_DIR/com.github.asus4.onnxruntime.linux-x64-gpu/Plugins/Linux/x64
+rm -f $GPU_LINUX_DIR/libonnxruntime_providers_shared.so
+cp $EXTRACT_DIR/linux-x64/native/libonnxruntime_providers_cuda.so $GPU_LINUX_DIR/
+cp $EXTRACT_DIR/linux-x64/native/libonnxruntime_providers_tensorrt.so $GPU_LINUX_DIR/
 
 echo "Done."
 exit 0

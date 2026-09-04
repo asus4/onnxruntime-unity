@@ -13,6 +13,17 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.github.asus4.onnxruntime.win-x64-gpu",
+            "expression": "0.4.10",
+            "define": "ORT_GPU_PROVIDER_WIN"
+        },
+        {
+            "name": "com.github.asus4.onnxruntime.linux-x64-gpu",
+            "expression": "0.4.10",
+            "define": "ORT_GPU_PROVIDER_LINUX"
+        }
+    ],
     "noEngineReferences": false
 }

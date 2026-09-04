@@ -37,13 +37,17 @@ Pre-built ONNX Runtime libraries for Unity.
 
 Execution Providers are hardware acceleration libraries for each platform. See [official docs](https://onnxruntime.ai/docs/execution-providers/) for more details.
 
-| Platform | CPU | CoreML | NNAPI | CUDA | TensorRT | DirectML | XNNPACK |
+| Platform | CPU | CoreML | NNAPI | WebGPU | CUDA | TensorRT | XNNPACK |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | macOS | :white_check_mark: | :white_check_mark: | | | | | |
 | iOS | :white_check_mark: | :white_check_mark: | | | | | :construction: |
 | Android | :white_check_mark: | | :white_check_mark: | | | | :construction: |
-| Windows | :white_check_mark: | | | :construction: | :construction: | :white_check_mark: | |
-| Linux | :white_check_mark: | | | :construction: | :construction: | | |
+| Windows | :white_check_mark: | | | :white_check_mark: | :construction: | :construction: | |
+| Linux | :white_check_mark: | | | | :construction: | :construction: | |
+
+> [!NOTE]
+> Windows GPU uses the [WebGPU EP](https://onnxruntime.ai/docs/execution-providers/WebGPU-ExecutionProvider.html) (Direct3D 12) bundled in the core package; DirectML is no longer published by Microsoft.
+> CUDA / TensorRT need the optional `win-x64-gpu` / `linux-x64-gpu` package and CUDA 13, cuDNN 9, TensorRT installed. They work in Player builds only.
 
 #### [ONNX Runtime Extensions](https://github.com/microsoft/onnxruntime-extensions)
 
@@ -75,9 +79,9 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
     }
   ]
   "dependencies": {
-    "com.github.asus4.onnxruntime": "0.4.9",
-    "com.github.asus4.onnxruntime.unity": "0.4.9",
-    "com.github.asus4.onnxruntime-extensions": "0.4.9",
+    "com.github.asus4.onnxruntime": "0.4.10",
+    "com.github.asus4.onnxruntime.unity": "0.4.10",
+    "com.github.asus4.onnxruntime-extensions": "0.4.10",
     ... other dependencies
   }
 ```
@@ -86,10 +90,10 @@ Pre-built libraries are available on [NPM](https://www.npmjs.com/package/com.git
 
 - `com.github.asus4.onnxruntime` : Core library
   - CPU provider for all platforms
-  - GPU provider for iOS, Android, macOS and Windows(only DirectML)
+  - GPU provider for iOS / macOS (CoreML), Android (NNAPI) and Windows (WebGPU)
 - `com.github.asus4.onnxruntime.unity` : (Optional) Utilities for Unity
-- `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) GPU provider for Windows
-- `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) GPU provider for Linux
+- `com.github.asus4.onnxruntime.win-x64-gpu` : (Optional) CUDA / TensorRT provider for Windows x64
+- `com.github.asus4.onnxruntime.linux-x64-gpu` : (Optional) CUDA / TensorRT provider for Linux x64
 - `com.github.asus4.onnxruntime-extensions` : (Optional) ONNX Runtime Extensions
 
 ## License

@@ -24,6 +24,10 @@ Pre-built ONNX Runtime libraries for Unity.
 
 <https://github.com/user-attachments/assets/0f8d6465-2835-475c-b90d-c08f5befd5dd>
 
+**Motionblicks**
+
+<https://github.com/user-attachments/assets/1822e1fa-7ea2-49ba-bdb3-886c9d71457e>
+
 ## Tested environment
 
 - Unity: 6000.6.0f1
